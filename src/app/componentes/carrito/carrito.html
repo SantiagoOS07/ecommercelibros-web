@@ -1,1 +1,81 @@
-<p>carrito works!</p>
+<h2>Carrito</h2>
+
+@if (carrito(); as carrito) {
+  <p>Estado: {{ carrito.estado }}</p>
+
+  @if (carrito.items.length === 0) {
+    <p>El carrito está vacío</p>
+  } @else {
+    <ul>
+      @for (item of carrito.items; track item.idItemCarrito) {
+        <li>
+          <strong>{{ item.tituloLibro }}</strong>
+          (ISBN {{ item.isbnLibro }}):
+          {{ item.cantidad }} x {{ item.precioUnitario }} = {{ item.precioTotal }}
+        </li>
+      }
+    </ul>
+  }
+  <p>Total: {{ carrito.precioTotal }}</p>
+
+  <h3>Agregar libro</h3>
+  <form [formGroup]="agregarForm" (ngSubmit)="agregar()">
+    <div>
+      <label>ID del libro:</label>
+      <input type="text" formControlName="idLibro" />
+      @if (agregarForm.get('idLibro')?.invalid && agregarForm.get('idLibro')?.touched) {
+        <div class="error">El libro es obligatorio.</div>
+      }
+    </div>
+    <div>
+      <label>Cantidad:</label>
+      <input type="number" formControlName="cantidad" />
+      @if (agregarForm.get('cantidad')?.invalid && agregarForm.get('cantidad')?.touched) {
+        <div class="error">La cantidad debe ser mayor a cero.</div>
+      }
+    </div>
+    <button type="submit" [disabled]="agregarForm.invalid || isLoading()">Agregar</button>
+  </form>
+
+  <h3>Cambiar cantidad</h3>
+  <form [formGroup]="cantidadForm" (ngSubmit)="actualizarCantidad()">
+    <div>
+      <label>ID del libro:</label>
+      <input type="text" formControlName="idLibro" />
+      @if (cantidadForm.get('idLibro')?.invalid && cantidadForm.get('idLibro')?.touched) {
+        <div class="error">El libro es obligatorio.</div>
+      }
+    </div>
+    <div>
+      <label>Nueva cantidad (0 quita el libro):</label>
+      <input type="number" formControlName="cantidad" />
+      @if (cantidadForm.get('cantidad')?.invalid && cantidadForm.get('cantidad')?.touched) {
+        <div class="error">La cantidad no puede ser negativa.</div>
+      }
+    </div>
+    <button type="submit" [disabled]="cantidadForm.invalid || isLoading()">Actualizar</button>
+  </form>
+
+  <h3>Quitar libro</h3>
+  <form [formGroup]="eliminarItemForm" (ngSubmit)="eliminarItem()">
+    <div>
+      <label>ID del libro:</label>
+      <input type="text" formControlName="idLibro" />
+      @if (eliminarItemForm.get('idLibro')?.invalid && eliminarItemForm.get('idLibro')?.touched) {
+        <div class="error">El libro es obligatorio.</div>
+      }
+    </div>
+    <button type="submit" [disabled]="eliminarItemForm.invalid || isLoading()">Quitar</button>
+  </form>
+
+  <h3>Acciones del carrito</h3>
+  <button type="button" (click)="confirmar()" [disabled]="isLoading()">Confirmar</button>
+  <button type="button" (click)="cancelarConfirmacion()" [disabled]="isLoading()">Cancelar confirmación</button>
+  <button type="button" (click)="completarCompra()" [disabled]="isLoading()">Completar compra</button>
+  <button type="button" (click)="eliminar()" [disabled]="isLoading()">Eliminar carrito</button>
+} @else {
+  <p>No tienes un carrito activo</p>
+  <button type="button" (click)="crear()" [disabled]="isLoading()">Crear carrito</button>
+}
+
+<div>{{ result() }}</div>
