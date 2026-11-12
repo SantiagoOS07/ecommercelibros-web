@@ -1,1 +1,52 @@
-<p>mis-compras works!</p>
+<h2>Mis compras</h2>
+
+@if (ventas().length === 0) {
+  <p>Todavía no tienes compras</p>
+} @else {
+  <ul>
+    @for (venta of ventas(); track venta.idVenta) {
+      <li>
+        <strong>{{ venta.idVenta }}</strong>
+        ({{ venta.fecha }}): {{ venta.estadoPedido }}, {{ venta.precio }} {{ venta.moneda }}
+        <ul>
+          @for (item of venta.items; track item.idItemVenta) {
+            <li>ISBN {{ item.isbnLibro }}: {{ item.cantidad }} x {{ item.precioUnitario }} = {{ item.precioTotal }}</li>
+          }
+        </ul>
+      </li>
+    }
+  </ul>
+}
+
+<h3>Cancelar compra</h3>
+<form [formGroup]="cancelarForm" (ngSubmit)="cancelar()">
+  <div>
+    <label>ID de la venta:</label>
+    <input type="text" formControlName="idVenta" />
+    @if (cancelarForm.get('idVenta')?.invalid && cancelarForm.get('idVenta')?.touched) {
+      <div class="error">La venta es obligatoria.</div>
+    }
+  </div>
+  <button type="submit" [disabled]="cancelarForm.invalid || isLoading()">Cancelar</button>
+</form>
+
+<h3>Solicitar reembolso</h3>
+<form [formGroup]="reembolsoForm" (ngSubmit)="solicitarReembolso()">
+  <div>
+    <label>ID de la venta:</label>
+    <input type="text" formControlName="idVenta" />
+    @if (reembolsoForm.get('idVenta')?.invalid && reembolsoForm.get('idVenta')?.touched) {
+      <div class="error">La venta es obligatoria.</div>
+    }
+  </div>
+  <div>
+    <label>Motivo:</label>
+    <input type="text" formControlName="motivo" />
+    @if (reembolsoForm.get('motivo')?.invalid && reembolsoForm.get('motivo')?.touched) {
+      <div class="error">El motivo es obligatorio.</div>
+    }
+  </div>
+  <button type="submit" [disabled]="reembolsoForm.invalid || isLoading()">Solicitar</button>
+</form>
+
+<div>{{ result() }}</div>

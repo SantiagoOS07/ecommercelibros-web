@@ -1,1 +1,45 @@
-<p>gestion-ventas works!</p>
+<h2>Gestión de ventas</h2>
+
+<h3>Buscar ventas de un usuario</h3>
+<form [formGroup]="buscarForm" (ngSubmit)="buscar()">
+  <div>
+    <label>ID del usuario:</label>
+    <input type="text" formControlName="idUsuario" />
+    @if (buscarForm.get('idUsuario')?.invalid && buscarForm.get('idUsuario')?.touched) {
+      <div class="error">El usuario es obligatorio.</div>
+    }
+  </div>
+  <button type="submit" [disabled]="buscarForm.invalid">Buscar</button>
+</form>
+
+@if (ventas().length === 0) {
+  <p>No hay ventas para mostrar</p>
+} @else {
+  <ul>
+    @for (venta of ventas(); track venta.idVenta) {
+      <li>
+        <strong>{{ venta.idVenta }}</strong>
+        ({{ venta.fecha }}): {{ venta.estadoPedido }}, {{ venta.precio }} {{ venta.moneda }}
+        <ul>
+          @for (item of venta.items; track item.idItemVenta) {
+            <li>ISBN {{ item.isbnLibro }}: {{ item.cantidad }} x {{ item.precioUnitario }} = {{ item.precioTotal }}</li>
+          }
+        </ul>
+      </li>
+    }
+  </ul>
+}
+
+<h3>Avanzar estado de una venta</h3>
+<form [formGroup]="estadoForm" (ngSubmit)="avanzarEstado()">
+  <div>
+    <label>ID de la venta:</label>
+    <input type="text" formControlName="idVenta" />
+    @if (estadoForm.get('idVenta')?.invalid && estadoForm.get('idVenta')?.touched) {
+      <div class="error">La venta es obligatoria.</div>
+    }
+  </div>
+  <button type="submit" [disabled]="estadoForm.invalid || isLoading()">Avanzar estado</button>
+</form>
+
+<div>{{ result() }}</div>
