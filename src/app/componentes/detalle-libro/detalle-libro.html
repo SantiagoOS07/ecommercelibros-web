@@ -1,1 +1,20 @@
-<p>detalle-libro works!</p>
+<h2>Detalle del libro</h2>
+
+@if (libro(); as l) {
+  <p>ID: {{ l.idLibro }}</p>
+  <p>Título: {{ l.titulo }}</p>
+  <p>ID autor: {{ l.idAutor }}</p>
+  <p>ISBN: {{ l.isbn }}</p>
+  <p>Descripción: {{ l.descripcion }}</p>
+  <p>Número de páginas: {{ l.numeroPaginas }}</p>
+  <p>Precio: {{ l.precio }} {{ l.moneda }}</p>
+  <p>Stock: {{ l.stock }}</p>
+  <p>Edición: {{ l.edicion }}</p>
+  <p>ID editorial: {{ l.idEditorial }}</p>
+  <p>Fecha de publicación: {{ l.fechaPublicacion }}</p>
+  <p>Categoría: {{ l.categoria }}</p>
+  <p>Imagen: {{ l.imagen }}</p>
+  <p>Estado: {{ l.estado }}</p>
+} @else {
+  <p>Cargando libro...</p>
+}

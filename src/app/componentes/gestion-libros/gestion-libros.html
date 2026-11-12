@@ -1,1 +1,278 @@
-<p>gestion-libros works!</p>
+<h2>Gestión de libros</h2>
+
+@if (result()) {
+  <p>{{ result() }}</p>
+}
+
+<h3>Editoriales</h3>
+<ul>
+  @for (editorial of editoriales(); track editorial.idEditorial) {
+    <li>{{ editorial.idEditorial }} - {{ editorial.nombreEditorial }} ({{ editorial.paisOrigen }})</li>
+  }
+</ul>
+
+<h3>Registrar editorial</h3>
+<form [formGroup]="editorialForm" (ngSubmit)="registrarEditorial()">
+  <input formControlName="nombreEditorial" placeholder="Nombre de la editorial" />
+  @if (editorialForm.controls.nombreEditorial.invalid && editorialForm.controls.nombreEditorial.touched) {
+    <span class="error">El nombre es obligatorio (máximo 150 caracteres)</span>
+  }
+
+  <input formControlName="paisOrigen" placeholder="País de origen (ej: ESPANA)" />
+  @if (editorialForm.controls.paisOrigen.invalid && editorialForm.controls.paisOrigen.touched) {
+    <span class="error">El país es obligatorio</span>
+  }
+
+  <input formControlName="descripcionEditorial" placeholder="Descripción" />
+  @if (editorialForm.controls.descripcionEditorial.invalid && editorialForm.controls.descripcionEditorial.touched) {
+    <span class="error">Máximo 2000 caracteres</span>
+  }
+
+  <button type="submit" [disabled]="isLoading()">Registrar editorial</button>
+</form>
+
+<h3>Registrar libro</h3>
+<form [formGroup]="libroForm" (ngSubmit)="registrarLibro()">
+  <input formControlName="titulo" placeholder="Título" />
+  @if (libroForm.controls.titulo.invalid && libroForm.controls.titulo.touched) {
+    <span class="error">El título es obligatorio (máximo 150 caracteres)</span>
+  }
+
+  <input formControlName="idAutor" placeholder="ID del autor" />
+  @if (libroForm.controls.idAutor.invalid && libroForm.controls.idAutor.touched) {
+    <span class="error">El ID del autor es obligatorio (máximo 36 caracteres)</span>
+  }
+
+  <input formControlName="isbn" placeholder="ISBN" />
+  @if (libroForm.controls.isbn.invalid && libroForm.controls.isbn.touched) {
+    <span class="error">El ISBN es obligatorio y debe tener 13 dígitos</span>
+  }
+
+  <input formControlName="descripcion" placeholder="Descripción" />
+  @if (libroForm.controls.descripcion.invalid && libroForm.controls.descripcion.touched) {
+    <span class="error">Máximo 2000 caracteres</span>
+  }
+
+  <input type="number" formControlName="numeroPaginas" placeholder="Número de páginas" />
+  @if (libroForm.controls.numeroPaginas.invalid && libroForm.controls.numeroPaginas.touched) {
+    <span class="error">El número de páginas es obligatorio (mínimo 1)</span>
+  }
+
+  <input type="number" formControlName="precio" placeholder="Precio" />
+  @if (libroForm.controls.precio.invalid && libroForm.controls.precio.touched) {
+    <span class="error">El precio es obligatorio (mínimo 0)</span>
+  }
+
+  <select formControlName="moneda">
+    <option value="">Selecciona la moneda</option>
+    @for (moneda of monedas; track moneda) {
+      <option [value]="moneda">{{ moneda }}</option>
+    }
+  </select>
+  @if (libroForm.controls.moneda.invalid && libroForm.controls.moneda.touched) {
+    <span class="error">La moneda es obligatoria</span>
+  }
+
+  <input type="number" formControlName="stock" placeholder="Stock" />
+  @if (libroForm.controls.stock.invalid && libroForm.controls.stock.touched) {
+    <span class="error">El stock es obligatorio (mínimo 0)</span>
+  }
+
+  <input formControlName="edicion" placeholder="Edición" />
+  @if (libroForm.controls.edicion.invalid && libroForm.controls.edicion.touched) {
+    <span class="error">Máximo 100 caracteres</span>
+  }
+
+  <input formControlName="idEditorial" placeholder="ID de la editorial" />
+  @if (libroForm.controls.idEditorial.invalid && libroForm.controls.idEditorial.touched) {
+    <span class="error">El ID de la editorial es obligatorio</span>
+  }
+
+  <input type="date" formControlName="fechaPublicacion" />
+  @if (libroForm.controls.fechaPublicacion.invalid && libroForm.controls.fechaPublicacion.touched) {
+    <span class="error">La fecha de publicación es obligatoria</span>
+  }
+
+  <select formControlName="categoria">
+    <option value="">Selecciona la categoría</option>
+    @for (categoria of categorias; track categoria) {
+      <option [value]="categoria">{{ categoria }}</option>
+    }
+  </select>
+  @if (libroForm.controls.categoria.invalid && libroForm.controls.categoria.touched) {
+    <span class="error">La categoría es obligatoria</span>
+  }
+
+  <input formControlName="imagen" placeholder="Imagen" />
+  @if (libroForm.controls.imagen.invalid && libroForm.controls.imagen.touched) {
+    <span class="error">Máximo 500 caracteres</span>
+  }
+
+  <select formControlName="estado">
+    <option value="">Selecciona el estado</option>
+    @for (estado of estados; track estado) {
+      <option [value]="estado">{{ estado }}</option>
+    }
+  </select>
+  @if (libroForm.controls.estado.invalid && libroForm.controls.estado.touched) {
+    <span class="error">El estado es obligatorio</span>
+  }
+
+  <button type="submit" [disabled]="isLoading()">Registrar libro</button>
+</form>
+
+<h3>Actualizar título</h3>
+<form [formGroup]="tituloForm" (ngSubmit)="actualizarTitulo()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (tituloForm.controls.idLibro.invalid && tituloForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input formControlName="titulo" placeholder="Nuevo título" />
+  @if (tituloForm.controls.titulo.invalid && tituloForm.controls.titulo.touched) {
+    <span class="error">El título es obligatorio (máximo 150 caracteres)</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar título</button>
+</form>
+
+<h3>Actualizar descripción</h3>
+<form [formGroup]="descripcionForm" (ngSubmit)="actualizarDescripcion()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (descripcionForm.controls.idLibro.invalid && descripcionForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input formControlName="descripcion" placeholder="Nueva descripción" />
+  @if (descripcionForm.controls.descripcion.invalid && descripcionForm.controls.descripcion.touched) {
+    <span class="error">Máximo 2000 caracteres</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar descripción</button>
+</form>
+
+<h3>Actualizar número de páginas</h3>
+<form [formGroup]="numeroPaginasForm" (ngSubmit)="actualizarNumeroPaginas()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (numeroPaginasForm.controls.idLibro.invalid && numeroPaginasForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input type="number" formControlName="numeroPaginas" placeholder="Número de páginas" />
+  @if (numeroPaginasForm.controls.numeroPaginas.invalid && numeroPaginasForm.controls.numeroPaginas.touched) {
+    <span class="error">El número de páginas es obligatorio (mínimo 1)</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar número de páginas</button>
+</form>
+
+<h3>Actualizar precio</h3>
+<form [formGroup]="precioForm" (ngSubmit)="actualizarPrecio()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (precioForm.controls.idLibro.invalid && precioForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input type="number" formControlName="precio" placeholder="Precio" />
+  @if (precioForm.controls.precio.invalid && precioForm.controls.precio.touched) {
+    <span class="error">El precio es obligatorio (mínimo 0)</span>
+  }
+  <select formControlName="moneda">
+    <option value="">Selecciona la moneda</option>
+    @for (moneda of monedas; track moneda) {
+      <option [value]="moneda">{{ moneda }}</option>
+    }
+  </select>
+  @if (precioForm.controls.moneda.invalid && precioForm.controls.moneda.touched) {
+    <span class="error">La moneda es obligatoria</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar precio</button>
+</form>
+
+<h3>Actualizar stock</h3>
+<form [formGroup]="stockForm" (ngSubmit)="actualizarStock()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (stockForm.controls.idLibro.invalid && stockForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input type="number" formControlName="stock" placeholder="Stock" />
+  @if (stockForm.controls.stock.invalid && stockForm.controls.stock.touched) {
+    <span class="error">El stock es obligatorio (mínimo 0)</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar stock</button>
+</form>
+
+<h3>Actualizar edición</h3>
+<form [formGroup]="edicionForm" (ngSubmit)="actualizarEdicion()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (edicionForm.controls.idLibro.invalid && edicionForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input formControlName="edicion" placeholder="Edición" />
+  @if (edicionForm.controls.edicion.invalid && edicionForm.controls.edicion.touched) {
+    <span class="error">Máximo 100 caracteres</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar edición</button>
+</form>
+
+<h3>Actualizar editorial del libro</h3>
+<form [formGroup]="editorialLibroForm" (ngSubmit)="actualizarEditorial()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (editorialLibroForm.controls.idLibro.invalid && editorialLibroForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input formControlName="idEditorial" placeholder="ID de la editorial" />
+  @if (editorialLibroForm.controls.idEditorial.invalid && editorialLibroForm.controls.idEditorial.touched) {
+    <span class="error">El ID de la editorial es obligatorio</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar editorial</button>
+</form>
+
+<h3>Actualizar fecha de publicación</h3>
+<form [formGroup]="fechaPublicacionForm" (ngSubmit)="actualizarFechaPublicacion()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (fechaPublicacionForm.controls.idLibro.invalid && fechaPublicacionForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input type="date" formControlName="fechaPublicacion" />
+  @if (fechaPublicacionForm.controls.fechaPublicacion.invalid && fechaPublicacionForm.controls.fechaPublicacion.touched) {
+    <span class="error">La fecha de publicación es obligatoria</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar fecha</button>
+</form>
+
+<h3>Actualizar categoría</h3>
+<form [formGroup]="categoriaForm" (ngSubmit)="actualizarCategoria()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (categoriaForm.controls.idLibro.invalid && categoriaForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <select formControlName="categoria">
+    <option value="">Selecciona la categoría</option>
+    @for (categoria of categorias; track categoria) {
+      <option [value]="categoria">{{ categoria }}</option>
+    }
+  </select>
+  @if (categoriaForm.controls.categoria.invalid && categoriaForm.controls.categoria.touched) {
+    <span class="error">La categoría es obligatoria</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar categoría</button>
+</form>
+
+<h3>Actualizar imagen</h3>
+<form [formGroup]="imagenForm" (ngSubmit)="actualizarImagen()">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (imagenForm.controls.idLibro.invalid && imagenForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <input formControlName="imagen" placeholder="Imagen" />
+  @if (imagenForm.controls.imagen.invalid && imagenForm.controls.imagen.touched) {
+    <span class="error">Máximo 500 caracteres</span>
+  }
+  <button type="submit" [disabled]="isLoading()">Actualizar imagen</button>
+</form>
+
+<h3>Acciones sobre el libro</h3>
+<form [formGroup]="accionesForm">
+  <input formControlName="idLibro" placeholder="ID del libro" />
+  @if (accionesForm.controls.idLibro.invalid && accionesForm.controls.idLibro.touched) {
+    <span class="error">El ID del libro es obligatorio</span>
+  }
+  <button type="button" (click)="agotar()" [disabled]="isLoading()">Agotar</button>
+  <button type="button" (click)="reactivar()" [disabled]="isLoading()">Reactivar</button>
+  <button type="button" (click)="descontinuar()" [disabled]="isLoading()">Descontinuar</button>
+  <button type="button" (click)="eliminar()" [disabled]="isLoading()">Eliminar</button>
+</form>

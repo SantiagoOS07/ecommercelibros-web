@@ -1,1 +1,17 @@
-<p>catalogo works!</p>
+<h2>Catálogo</h2>
+
+@if (libros().length === 0) {
+  <p>Todavía no hay libros publicados</p>
+} @else {
+  <ul>
+    @for (libro of libros(); track libro.idLibro) {
+      <li>
+        <a [routerLink]="['/catalogo', libro.idLibro]">{{ libro.titulo }}</a>
+        <p>ID: {{ libro.idLibro }}</p>
+        <p>Precio: {{ libro.precio }} {{ libro.moneda }}</p>
+        <p>Categoría: {{ libro.categoria }}</p>
+        <p>Estado: {{ libro.estado }}</p>
+      </li>
+    }
+  </ul>
+}
