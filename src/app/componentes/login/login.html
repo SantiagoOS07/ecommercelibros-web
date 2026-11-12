@@ -1,1 +1,23 @@
-<p>login works!</p>
+<h2>Iniciar sesión</h2>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label>Correo electrónico:</label>
+    <input type="email" formControlName="correo" />
+    @if (loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched) {
+      <div class="error">Por favor ingrese un correo electrónico válido.</div>
+    }
+  </div>
+
+  <div>
+    <label>Contraseña:</label>
+    <input type="password" formControlName="contrasenia" />
+    @if (loginForm.get('contrasenia')?.invalid && loginForm.get('contrasenia')?.touched) {
+      <div class="error">La contraseña debe tener al menos 8 caracteres.</div>
+    }
+  </div>
+
+  <button type="submit" [disabled]="!canSubmit()">
+    @if (isLoading()) { Ingresando... } @else { Ingresar }
+  </button>
+  <div>{{ result() }}</div>
+</form>
