@@ -2,16 +2,24 @@
   <p>Bienvenido a {{ title() }}</p>
   <ul>
     <li><a routerLink="/">Inicio</a></li>
-    <li><a routerLink="/login">Login</a></li>
+    <li>
+      @if (auth.isAuthenticated()) {
+        <a href="#" (click)="cerrarSesion(); $event.preventDefault()">Cerrar sesión</a>
+      } @else {
+        <a routerLink="/login">Iniciar sesión</a>
+      }
+    </li>
     <li><a routerLink="/registro">Registro</a></li>
     <li><a routerLink="/catalogo">Catálogo</a></li>
-    <li><a routerLink="/carrito">Carrito</a></li>
-    <li><a routerLink="/mis-compras">Mis compras</a></li>
-    <li><a routerLink="/perfil">Perfil</a></li>
-    <li><a routerLink="/gestion-libros">Libros</a></li>
-    <li><a routerLink="/gestion-autores">Autores</a></li>
-    <li><a routerLink="/gestion-ventas">Ventas</a></li>
-    <li><a routerLink="/gestion-usuarios">Usuarios</a></li>
+    @if (auth.isAuthenticated()) {
+      <li><a routerLink="/carrito">Carrito</a></li>
+      <li><a routerLink="/mis-compras">Mis compras</a></li>
+      <li><a routerLink="/perfil">Perfil</a></li>
+      <li><a routerLink="/gestion-libros">Libros</a></li>
+      <li><a routerLink="/gestion-autores">Autores</a></li>
+      <li><a routerLink="/gestion-ventas">Ventas</a></li>
+      <li><a routerLink="/gestion-usuarios">Usuarios</a></li>
+    }
   </ul>
 </header>
 <router-outlet />
