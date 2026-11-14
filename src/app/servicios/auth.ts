@@ -28,6 +28,14 @@ export class AuthService {
     return localStorage.getItem('uid');
   }
 
+  getRoles(): string[] {
+    return JSON.parse(localStorage.getItem('roles') ?? '[]');
+  }
+
+  tieneRol(roles: string[]): boolean {
+    return this.getRoles().some(rol => roles.includes(rol));
+  }
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('roles');
