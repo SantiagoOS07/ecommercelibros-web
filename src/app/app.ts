@@ -1,21 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
-import { Router, RouterOutlet, RouterLink } from '@angular/router';
-import { AuthService } from './servicios/auth';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Header } from './componentes/header/header';
+import { Footer } from './componentes/footer/footer';
+import { Notificaciones } from './componentes/notificaciones/notificaciones';
 
 @Component({
+  imports: [RouterOutlet, Header, Footer, Notificaciones],
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
+  styleUrl: './app.css',
   templateUrl: './app.html',
-  styleUrl: './app.css'
 })
-export class App {
-  auth = inject(AuthService);
-  private router = inject(Router);
-  title = signal('Ecommerce Libros');
-  footer = signal('Universidad del Quindío');
-
-  cerrarSesion(): void {
-    this.auth.logout();
-    this.router.navigate(['/']);
-  }
-}
+export class App {}
