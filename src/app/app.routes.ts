@@ -11,19 +11,40 @@ import { GestionLibros } from './componentes/gestion-libros/gestion-libros';
 import { GestionAutores } from './componentes/gestion-autores/gestion-autores';
 import { GestionVentas } from './componentes/gestion-ventas/gestion-ventas';
 import { GestionUsuarios } from './componentes/gestion-usuarios/gestion-usuarios';
+import { authGuard, guestGuard, rolGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
-  { path: 'login', component: Login },
-  { path: 'registro', component: Registro },
+  { path: 'login', component: Login, canActivate: [guestGuard] },
+  { path: 'registro', component: Registro, canActivate: [guestGuard] },
   { path: 'catalogo', component: Catalogo },
   { path: 'catalogo/:id', component: DetalleLibro },
-  { path: 'carrito', component: Carrito },
-  { path: 'mis-compras', component: MisCompras },
-  { path: 'perfil', component: Perfil },
-  { path: 'gestion-libros', component: GestionLibros },
-  { path: 'gestion-autores', component: GestionAutores },
-  { path: 'gestion-ventas', component: GestionVentas },
-  { path: 'gestion-usuarios', component: GestionUsuarios },
+  { path: 'carrito', component: Carrito, canActivate: [authGuard] },
+  { path: 'mis-compras', component: MisCompras, canActivate: [authGuard] },
+  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
+  {
+    path: 'gestion-libros',
+    component: GestionLibros,
+    canActivate: [rolGuard],
+    data: { roles: ['ADMINISTRADOR', 'PROVEEDOR'] }
+  },
+  {
+    path: 'gestion-autores',
+    component: GestionAutores,
+    canActivate: [rolGuard],
+    data: { roles: ['ADMINISTRADOR', 'PROVEEDOR'] }
+  },
+  {
+    path: 'gestion-ventas',
+    component: GestionVentas,
+    canActivate: [rolGuard],
+    data: { roles: ['ADMINISTRADOR', 'PROVEEDOR'] }
+  },
+  {
+    path: 'gestion-usuarios',
+    component: GestionUsuarios,
+    canActivate: [rolGuard],
+    data: { roles: ['ADMINISTRADOR'] }
+  },
   { path: '**', pathMatch: 'full', redirectTo: '/' },
 ];
