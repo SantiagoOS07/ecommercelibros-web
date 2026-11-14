@@ -1,1 +1,155 @@
-<p>perfil works!</p>
+<div class="container mt-4">
+  <h1 class="h3 mb-4">
+    <i class="fa-solid fa-user me-2"></i>Mi perfil
+  </h1>
+
+  @if (usuario(); as u) {
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">
+          <i class="fa-solid fa-id-card me-2"></i>{{ u.nombre }}
+        </span>
+        <div class="d-flex gap-2">
+          <span class="badge {{ badgeRol(u.rolUsuario) }}">{{ u.rolUsuario }}</span>
+          <span class="badge {{ badgeEstado(u.estadoUsuario) }}">{{ u.estadoUsuario }}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Correo</p>
+            <p class="mb-0"><i class="fa-solid fa-envelope me-2"></i>{{ u.correo }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Teléfono</p>
+            <p class="mb-0"><i class="fa-solid fa-phone me-2"></i>{{ u.telefono }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Dirección</p>
+            <p class="mb-0"><i class="fa-solid fa-location-dot me-2"></i>{{ u.direccion }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted small">Identificador</p>
+            <p class="mb-0 small text-break"><i class="fa-solid fa-fingerprint me-2"></i>{{ u.idUsuario }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-5 text-muted">
+      <span class="spinner-border mb-3"></span>
+      <p class="h5">Cargando perfil...</p>
+    </div>
+  }
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-signature me-2"></i>Cambiar nombre</div>
+        <div class="card-body">
+          <form [formGroup]="nombreForm" (ngSubmit)="actualizarNombre()">
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" formControlName="nombre" class="form-control" />
+              @if (nombreForm.get('nombre')?.invalid && nombreForm.get('nombre')?.touched) {
+                <div class="text-danger small mt-1">El nombre es obligatorio y tiene máximo 100 caracteres.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="nombreForm.invalid || isLoading()">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-envelope me-2"></i>Cambiar correo</div>
+        <div class="card-body">
+          <form [formGroup]="correoForm" (ngSubmit)="actualizarCorreo()">
+            <div class="mb-3">
+              <label class="form-label">Correo electrónico</label>
+              <input type="email" formControlName="correo" class="form-control" />
+              @if (correoForm.get('correo')?.invalid && correoForm.get('correo')?.touched) {
+                <div class="text-danger small mt-1">Ingresa un correo válido de máximo 150 caracteres.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="correoForm.invalid || isLoading()">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-phone me-2"></i>Cambiar teléfono</div>
+        <div class="card-body">
+          <form [formGroup]="telefonoForm" (ngSubmit)="actualizarTelefono()">
+            <div class="mb-3">
+              <label class="form-label">Teléfono</label>
+              <input type="text" formControlName="telefono" class="form-control" />
+              @if (telefonoForm.get('telefono')?.invalid && telefonoForm.get('telefono')?.touched) {
+                <div class="text-danger small mt-1">El teléfono es obligatorio y tiene máximo 20 caracteres.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="telefonoForm.invalid || isLoading()">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-location-dot me-2"></i>Cambiar dirección</div>
+        <div class="card-body">
+          <form [formGroup]="direccionForm" (ngSubmit)="actualizarDireccion()">
+            <div class="mb-3">
+              <label class="form-label">Dirección</label>
+              <input type="text" formControlName="direccion" class="form-control" />
+              @if (direccionForm.get('direccion')?.invalid && direccionForm.get('direccion')?.touched) {
+                <div class="text-danger small mt-1">La dirección es obligatoria y tiene máximo 200 caracteres.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="direccionForm.invalid || isLoading()">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header"><i class="fa-solid fa-key me-2"></i>Cambiar contraseña</div>
+        <div class="card-body">
+          <form [formGroup]="contraseniaForm" (ngSubmit)="cambiarContrasenia()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Contraseña actual</label>
+                <input type="password" formControlName="contraseniaActual" class="form-control" />
+                @if (contraseniaForm.get('contraseniaActual')?.invalid && contraseniaForm.get('contraseniaActual')?.touched) {
+                  <div class="text-danger small mt-1">La contraseña actual es obligatoria.</div>
+                }
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Nueva contraseña</label>
+                <input type="password" formControlName="nuevaContrasenia" class="form-control" />
+                @if (contraseniaForm.get('nuevaContrasenia')?.invalid && contraseniaForm.get('nuevaContrasenia')?.touched) {
+                  <div class="text-danger small mt-1">La nueva contraseña debe tener al menos 8 caracteres.</div>
+                }
+              </div>
+            </div>
+            <button type="submit" class="btn btn-warning mt-3" [disabled]="contraseniaForm.invalid || isLoading()">
+              <i class="fa-solid fa-key me-1"></i>Cambiar contraseña
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
