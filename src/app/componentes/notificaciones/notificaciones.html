@@ -1,1 +1,13 @@
-<p>notificaciones works!</p>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080">
+  @for (aviso of servicio.avisos(); track aviso.id) {
+    <div class="alert shadow-sm mb-2"
+         [class.alert-success]="aviso.tipo === 'exito'"
+         [class.alert-danger]="aviso.tipo === 'error'"
+         [class.alert-info]="aviso.tipo === 'info'"
+         role="alert"
+         style="cursor: pointer"
+         (click)="servicio.quitar(aviso.id)">
+      {{ aviso.texto }}
+    </div>
+  }
+</div>
