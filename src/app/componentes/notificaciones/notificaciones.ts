@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { NotificacionesService } from '../../servicios/notificaciones';
 
 @Component({
   imports: [],
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   styleUrl: './notificaciones.css',
   templateUrl: './notificaciones.html',
 })
-export class Notificaciones {}
+export class Notificaciones {
+  servicio = inject(NotificacionesService);
+}
