@@ -10,10 +10,6 @@ export class EditorialesService {
     private http = inject(HttpClient);
     private url = 'http://localhost:8080/api/editoriales';
 
-    crear() {
-        return this.http.post<EditorialResponse>(this.url, null);
-    }
-
     listar() {
         return this.http.get<EditorialResponse[]>(this.url);
     }

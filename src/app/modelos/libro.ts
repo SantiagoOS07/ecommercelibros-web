@@ -48,7 +48,7 @@ export interface RegistrarLibroRequest {
 }
 
 export interface ActualizarTituloLibroRequest {
-    titulo?: string;
+    titulo: string;
 }
 
 export interface ActualizarDescripcionLibroRequest {

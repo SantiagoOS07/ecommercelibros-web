@@ -22,9 +22,6 @@ export class LibrosService {
     private http = inject(HttpClient);
     private url = 'http://localhost:8080/api/libros';
 
-    crear(){
-        return this.http.post<LibroResponse>(this.url, null);
-    }
 
     listar(){
         return this.http.get<Pagina<LibroDetalleResponse>>(this.url);
