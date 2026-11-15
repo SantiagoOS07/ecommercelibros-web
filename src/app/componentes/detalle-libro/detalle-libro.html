@@ -1,20 +1,39 @@
-<h2>Detalle del libro</h2>
+<div class="container mt-4">
+  <h1 class="h3 mb-4"><i class="fa-solid fa-book-open me-2"></i>Detalle del libro</h1>
 
-@if (libro(); as l) {
-  <p>ID: {{ l.idLibro }}</p>
-  <p>Título: {{ l.titulo }}</p>
-  <p>ID autor: {{ l.idAutor }}</p>
-  <p>ISBN: {{ l.isbn }}</p>
-  <p>Descripción: {{ l.descripcion }}</p>
-  <p>Número de páginas: {{ l.numeroPaginas }}</p>
-  <p>Precio: {{ l.precio }} {{ l.moneda }}</p>
-  <p>Stock: {{ l.stock }}</p>
-  <p>Edición: {{ l.edicion }}</p>
-  <p>ID editorial: {{ l.idEditorial }}</p>
-  <p>Fecha de publicación: {{ l.fechaPublicacion }}</p>
-  <p>Categoría: {{ l.categoria }}</p>
-  <p>Imagen: {{ l.imagen }}</p>
-  <p>Estado: {{ l.estado }}</p>
-} @else {
-  <p>Cargando libro...</p>
-}
+  @if (libro(); as l) {
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card">
+          <img [src]="l.imagen" [alt]="l.titulo" class="card-img-top img-fluid" />
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">{{ l.titulo }}</span>
+            <span class="badge" [class]="badgeEstado(l.estado)">{{ l.estado }}</span>
+          </div>
+          <div class="card-body">
+            <p class="mb-2"><i class="fa-solid fa-tag me-1"></i>{{ l.precio | number:'1.0-0' }} {{ l.moneda }}</p>
+            <p class="mb-2">{{ l.descripcion }}</p>
+            <p class="mb-1"><strong>ISBN:</strong> {{ l.isbn }}</p>
+            <p class="mb-1"><strong>Páginas:</strong> {{ l.numeroPaginas }}</p>
+            <p class="mb-1"><strong>Edición:</strong> {{ l.edicion }}</p>
+            <p class="mb-1"><strong>Categoría:</strong> {{ l.categoria }}</p>
+            <p class="mb-1"><strong>Fecha de publicación:</strong> {{ l.fechaPublicacion }}</p>
+            <p class="mb-1"><strong>Stock:</strong> {{ l.stock }}</p>
+            <p class="mb-1"><strong>ID autor:</strong> {{ l.idAutor }}</p>
+            <p class="mb-0"><strong>ID editorial:</strong> {{ l.idEditorial }}</p>
+          </div>
+          <div class="card-footer">
+            <a routerLink="/catalogo" class="btn btn-outline-secondary btn-sm">
+              <i class="fa-solid fa-arrow-left me-1"></i>Volver al catálogo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+      <p class="mt-2 text-muted">Cargando libro...</p>
+    </div>
+  }
+</div>

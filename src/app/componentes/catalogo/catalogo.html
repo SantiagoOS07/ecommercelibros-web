@@ -1,17 +1,41 @@
-<h2>Catálogo</h2>
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 id="titulo-catalogo" class="h3 mb-0">
+      <i class="fa-solid fa-store me-2"></i>Catálogo de Libros
+    </h1>
+  </div>
 
-@if (libros().length === 0) {
-  <p>Todavía no hay libros publicados</p>
-} @else {
-  <ul>
-    @for (libro of libros(); track libro.idLibro) {
-      <li>
-        <a [routerLink]="['/catalogo', libro.idLibro]">{{ libro.titulo }}</a>
-        <p>ID: {{ libro.idLibro }}</p>
-        <p>Precio: {{ libro.precio }} {{ libro.moneda }}</p>
-        <p>Categoría: {{ libro.categoria }}</p>
-        <p>Estado: {{ libro.estado }}</p>
-      </li>
-    }
-  </ul>
-}
+  @if (libros().length === 0) {
+    <div class="text-center py-5 text-muted">
+      <i class="fa-solid fa-book fa-4x mb-3"></i>
+      <p class="lead">Todavía no hay libros publicados</p>
+    </div>
+  } @else {
+    <div class="row g-3">
+      @for (libro of libros(); track libro.idLibro) {
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">{{ libro.titulo }}</span>
+              <span class="badge" [class]="badgeEstado(libro.estado)">{{ libro.estado }}</span>
+            </div>
+            <div class="card-body">
+              <p class="mb-2">
+                <i class="fa-solid fa-tag me-1"></i>
+                {{ libro.precio | number:'1.0-0' }} {{ libro.moneda }}
+              </p>
+              <p class="mb-0 text-muted small">
+                <i class="fa-solid fa-layer-group me-1"></i>{{ libro.categoria }}
+              </p>
+            </div>
+            <div class="card-footer text-end">
+              <a [routerLink]="['/catalogo', libro.idLibro]" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-eye me-1"></i>Ver detalle
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

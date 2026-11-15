@@ -6,6 +6,7 @@ import { LibrosService } from '../../servicios/libro';
 import { EditorialesService } from '../../servicios/editorial';
 import { EditorialResponse } from '../../modelos/editorial';
 import { CategoriaLibro, EstadoLibro, Moneda } from '../../modelos/libro';
+import { NotificacionesService } from '../../servicios/notificaciones';
 
 @Component({
   selector: 'app-gestion-libros',
@@ -18,8 +19,8 @@ export class GestionLibros {
   private destroyRef = inject(DestroyRef);
   private librosService = inject(LibrosService);
   private editorialesService = inject(EditorialesService);
+  private avisos = inject(NotificacionesService);
 
-  result = signal('');
   isLoading = signal(false);
   editoriales = signal<EditorialResponse[]>([]);
 
@@ -274,23 +275,23 @@ export class GestionLibros {
       return;
     }
     this.isLoading.set(true);
-    this.result.set('');
     accion()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: respuesta => {
           this.isLoading.set(false);
-          this.result.set(exito(respuesta));
+          this.avisos.exito(exito(respuesta));
           if (despues) {
             despues();
           }
         },
         error: err => {
           this.isLoading.set(false);
-          this.result.set(this.mensajeError(err.status));
+          this.avisos.error(this.mensajeError(err.status));
         }
       });
   }
+
 
   private mensajeError(status: number): string {
     switch (status) {
