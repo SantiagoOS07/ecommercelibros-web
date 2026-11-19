@@ -5,17 +5,30 @@
     </h1>
   </div>
 
-  @if (libros(); as lista) {
-  @if (lista.length === 0) {
+  <div class="input-group mb-4">
+    <span class="input-group-text">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </span>
+    <input #caja type="text" class="form-control"
+           placeholder="Escribe para buscar por título"
+           (input)="escribir(caja.value)" />
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status"></div>
+      <p class="mt-2 text-muted">Cargando libros...</p>
+    </div>
+  } @else if (libros().length === 0) {
     <div class="text-center py-5 text-muted">
       <i class="fa-solid fa-book fa-4x mb-3"></i>
-      <p class="lead">Todavía no hay libros publicados</p>
+      <p class="lead">No hay libros para mostrar</p>
     </div>
   } @else {
     <div class="row g-3">
-      @for (libro of lista; track libro.idLibro) {
+      @for (libro of libros(); track libro.idLibro) {
         <div class="col-md-6 col-lg-4">
-          <div class="card h-100">
+          <div class="card h-100 shadow-sm rounded-4">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span class="fw-semibold">{{ libro.titulo }}</span>
               <span class="badge" [class]="badgeEstado(libro.estado)">{{ libro.estado }}</span>
@@ -38,11 +51,19 @@
         </div>
       }
     </div>
+
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+      <button class="btn btn-outline-primary btn-sm" type="button"
+              (click)="anterior()" [disabled]="esPrimera()">
+        <i class="fa-solid fa-chevron-left me-1"></i>Anterior
+      </button>
+      <span class="text-muted small">
+        Página {{ pagina() + 1 }} de {{ totalPaginas() }} ({{ total() }} libros)
+      </span>
+      <button class="btn btn-outline-primary btn-sm" type="button"
+              (click)="siguiente()" [disabled]="esUltima()">
+        Siguiente<i class="fa-solid fa-chevron-right ms-1"></i>
+      </button>
+    </div>
   }
-} @else {
-  <div class="text-center py-5">
-    <div class="spinner-border" role="status"></div>
-    <p class="mt-2 text-muted">Cargando libros...</p>
-  </div>
-}
 </div>

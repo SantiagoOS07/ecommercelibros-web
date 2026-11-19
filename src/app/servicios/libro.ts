@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import {
     RegistrarLibroRequest,
     ActualizarTituloLibroRequest,
@@ -23,8 +23,14 @@ export class LibrosService {
     private url = 'http://localhost:8080/api/libros';
 
 
-    listar() {
-        return this.http.get<Pagina<LibroDetalleResponse>>(this.url);
+    listar(pagina = 0, tamanio = 3, palabra = '') {
+        let params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
+
+        if (palabra.trim()) {
+            params = params.set('palabra', palabra.trim());
+        }
+
+        return this.http.get<Pagina<LibroDetalleResponse>>(this.url, { params });
     }
 
     consultarPorId(idLibro: string) {
