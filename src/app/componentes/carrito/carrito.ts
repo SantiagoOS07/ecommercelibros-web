@@ -1,13 +1,16 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CarritosService } from '../../servicios/carritos';
 import { AuthService } from '../../servicios/auth';
+import { NotificacionesService } from '../../servicios/notificaciones';
 import { AgregarItemCarritoRequest, CarritoResponse } from '../../modelos/carrito';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DecimalPipe, RouterLink],
   selector: 'app-carrito',
   styleUrl: './carrito.css',
   templateUrl: './carrito.html',
@@ -15,10 +18,12 @@ import { AgregarItemCarritoRequest, CarritoResponse } from '../../modelos/carrit
 export class Carrito {
   private carritosService = inject(CarritosService);
   private authService = inject(AuthService);
+  private avisos = inject(NotificacionesService);
   private destroyRef = inject(DestroyRef);
   private formBuilder = inject(FormBuilder);
 
   carrito = signal<CarritoResponse | null>(null);
+  cargando = signal(true);
   result = signal('');
   isLoading = signal(false);
 
@@ -44,11 +49,15 @@ export class Carrito {
     this.carritosService.consultarPorUsuario(this.authService.getUid() ?? '')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (carrito) => this.carrito.set(carrito),
+        next: (carrito) => {
+          this.carrito.set(carrito);
+          this.cargando.set(false);
+        },
         error: (err) => {
           this.carrito.set(null);
+          this.cargando.set(false);
           if (err.status !== 404) {
-            this.result.set(this.mensajeError(err.status));
+            this.avisos.error(this.mensajeError(err.status));
           }
         }
       });
@@ -112,15 +121,25 @@ export class Carrito {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (venta) => {
-          this.result.set(`Compra realizada: venta ${venta.idVenta} (${venta.estadoPedido})`);
+          this.result.set(`Venta ${venta.idVenta} creada en estado ${venta.estadoPedido}`);
+          this.avisos.exito('Compra realizada correctamente');
           this.isLoading.set(false);
           this.cargar();
         },
         error: (err) => {
-          this.result.set(this.mensajeError(err.status));
+          this.avisos.error(this.mensajeError(err.status));
           this.isLoading.set(false);
         }
       });
+  }
+
+  badgeEstado(estado: string): string {
+    const colores: Record<string, string> = {
+      CREADO: 'bg-primary',
+      PROCESANDO: 'bg-warning text-dark',
+      VENDIDO: 'bg-success'
+    };
+    return colores[estado] ?? 'bg-secondary';
   }
 
   private ejecutar(peticion: Observable<unknown>, mensaje: string): void {
@@ -130,12 +149,12 @@ export class Carrito {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.result.set(mensaje);
+          this.avisos.exito(mensaje);
           this.isLoading.set(false);
           this.cargar();
         },
         error: (err) => {
-          this.result.set(this.mensajeError(err.status));
+          this.avisos.error(this.mensajeError(err.status));
           this.isLoading.set(false);
         }
       });
