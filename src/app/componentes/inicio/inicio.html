@@ -1,2 +1,22 @@
-<h2>Inicio</h2>
-<p>Bienvenido a la tienda de libros</p>
+<div class="container mt-5">
+  <div class="p-5 text-center bg-body-tertiary rounded-3 shadow-sm">
+    <i class="fa-solid fa-book-open-reader fa-4x text-primary mb-3"></i>
+    <h1 class="h2 fw-bold">Bienvenido a Ecommerce Libros</h1>
+    <p class="lead text-muted mb-4">
+      Encuentra tu próxima lectura entre novelas, ciencia, historia, programación y mucho más.
+    </p>
+    <div class="d-flex justify-content-center flex-wrap gap-2">
+      <a routerLink="/catalogo" class="btn btn-primary">
+        <i class="fa-solid fa-store me-1"></i>Ver catálogo
+      </a>
+      @if (!isLoggedIn()) {
+        <a routerLink="/registro" class="btn btn-outline-primary">
+          <i class="fa-solid fa-user-plus me-1"></i>Crear cuenta
+        </a>
+        <a routerLink="/login" class="btn btn-outline-secondary">
+          <i class="fa-solid fa-right-to-bracket me-1"></i>Ingresar
+        </a>
+      }
+    </div>
+  </div>
+</div>

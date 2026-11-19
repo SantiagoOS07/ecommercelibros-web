@@ -1,18 +1,20 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../servicios/auth';
+import { NotificacionesService } from '../../servicios/notificaciones';
 import { LoginRequest } from '../../modelos/auth';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   selector: 'app-login',
   styleUrl: './login.css',
   templateUrl: './login.html',
 })
 export class Login {
   private authService = inject(AuthService);
+  private avisos = inject(NotificacionesService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -22,7 +24,6 @@ export class Login {
   });
 
   isLoading = signal(false);
-  result = signal('');
 
   formStatus = toSignal(this.loginForm.statusChanges, { initialValue: 'INVALID' as const });
   canSubmit = computed(() => this.formStatus() === 'VALID' && !this.isLoading());
@@ -37,12 +38,16 @@ export class Login {
       .subscribe({
         next: (respuesta) => {
           this.authService.guardarSesion(respuesta);
-          this.result.set('Sesión iniciada correctamente');
+          this.avisos.exito('Sesión iniciada correctamente');
           this.router.navigate(['/']);
         },
-        error: () => {
+        error: (err) => {
           this.isLoading.set(false);
-          this.result.set('Error al iniciar sesión');
+          if (err.status === 401) {
+            this.avisos.error('Correo o contraseña incorrectos');
+          } else {
+            this.avisos.error('Ocurrió un error. Intenta de nuevo más tarde');
+          }
         }
       });
   }

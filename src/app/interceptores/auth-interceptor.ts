@@ -1,18 +1,28 @@
 import { inject } from '@angular/core';
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../servicios/auth';
+import { NotificacionesService } from '../servicios/notificaciones';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = inject(AuthService).getToken();
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const avisos = inject(NotificacionesService);
+  const token = auth.getToken();
 
-  if (token) {
-    const peticionConToken = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
+  const peticion = token
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    : req;
+
+  return next(peticion).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && token && !req.url.includes('/auth/login')) {
+        auth.logout();
+        avisos.error('Tu sesión venció. Inicia sesión nuevamente.');
+        router.navigate(['/login']);
       }
-    });
-    return next(peticionConToken);
-  }
-
-  return next(req);
+      return throwError(() => error);
+    })
+  );
 };
