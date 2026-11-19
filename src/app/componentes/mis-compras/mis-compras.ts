@@ -1,13 +1,15 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { VentasService } from '../../servicios/ventas';
 import { AuthService } from '../../servicios/auth';
+import { NotificacionesService } from '../../servicios/notificaciones';
 import { VentaResponse } from '../../modelos/venta';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, DecimalPipe],
   selector: 'app-mis-compras',
   styleUrl: './mis-compras.css',
   templateUrl: './mis-compras.html',
@@ -15,11 +17,12 @@ import { VentaResponse } from '../../modelos/venta';
 export class MisCompras {
   private ventasService = inject(VentasService);
   private authService = inject(AuthService);
+  private avisos = inject(NotificacionesService);
   private destroyRef = inject(DestroyRef);
   private formBuilder = inject(FormBuilder);
 
   ventas = signal<VentaResponse[]>([]);
-  result = signal('');
+  cargando = signal(true);
   isLoading = signal(false);
 
   cancelarForm = this.formBuilder.group({
@@ -39,8 +42,14 @@ export class MisCompras {
     this.ventasService.consultarPorUsuario(this.authService.getUid() ?? '')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (ventas) => this.ventas.set(ventas),
-        error: (err) => this.result.set(this.mensajeError(err.status))
+        next: (ventas) => {
+          this.ventas.set(ventas);
+          this.cargando.set(false);
+        },
+        error: (err) => {
+          this.cargando.set(false);
+          this.avisos.error(this.mensajeError(err.status));
+        }
       });
   }
 
@@ -58,6 +67,17 @@ export class MisCompras {
     this.reembolsoForm.reset();
   }
 
+  badgeEstado(estado: string): string {
+    const colores: Record<string, string> = {
+      PREPARANDO: 'bg-warning text-dark',
+      ENVIADO: 'bg-info text-dark',
+      ENTREGADO: 'bg-success',
+      CANCELADO: 'bg-secondary',
+      REEMBOLSADO: 'bg-dark'
+    };
+    return colores[estado] ?? 'bg-secondary';
+  }
+
   private ejecutar(peticion: Observable<unknown>, mensaje: string): void {
     this.isLoading.set(true);
 
@@ -65,12 +85,12 @@ export class MisCompras {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.result.set(mensaje);
+          this.avisos.exito(mensaje);
           this.isLoading.set(false);
           this.cargar();
         },
         error: (err) => {
-          this.result.set(this.mensajeError(err.status));
+          this.avisos.error(this.mensajeError(err.status));
           this.isLoading.set(false);
         }
       });

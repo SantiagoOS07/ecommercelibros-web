@@ -1,45 +1,96 @@
-<h2>Gestión de ventas</h2>
+<div class="container mt-4">
+  <h1 class="h3 mb-4">
+    <i class="fa-solid fa-receipt me-2"></i>Gestión de ventas
+  </h1>
 
-<h3>Buscar ventas de un usuario</h3>
-<form [formGroup]="buscarForm" (ngSubmit)="buscar()">
-  <div>
-    <label>ID del usuario:</label>
-    <input type="text" formControlName="idUsuario" />
-    @if (buscarForm.get('idUsuario')?.invalid && buscarForm.get('idUsuario')?.touched) {
-      <div class="error">El usuario es obligatorio.</div>
+  <div class="row g-3 mb-4">
+    @if (auth.tieneRol(['ADMINISTRADOR'])) {
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header"><i class="fa-solid fa-magnifying-glass me-2"></i>Buscar ventas de un usuario</div>
+          <div class="card-body">
+            <form [formGroup]="buscarForm" (ngSubmit)="buscar()">
+              <div class="mb-3">
+                <label class="form-label">ID del usuario</label>
+                <input type="text" formControlName="idUsuario" class="form-control" />
+                @if (buscarForm.get('idUsuario')?.invalid && buscarForm.get('idUsuario')?.touched) {
+                  <div class="text-danger small mt-1">El usuario es obligatorio.</div>
+                }
+              </div>
+              <button type="submit" class="btn btn-primary" [disabled]="buscarForm.invalid">
+                <i class="fa-solid fa-magnifying-glass me-1"></i>Buscar
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     }
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-truck-fast me-2"></i>Avanzar estado de una venta</div>
+        <div class="card-body">
+          <p class="small text-muted">Cada envío avanza la venta un paso: PREPARANDO, ENVIADO y ENTREGADO.</p>
+          <form [formGroup]="estadoForm" (ngSubmit)="avanzarEstado()">
+            <div class="mb-3">
+              <label class="form-label">ID de la venta</label>
+              <input type="text" formControlName="idVenta" class="form-control" />
+              @if (estadoForm.get('idVenta')?.invalid && estadoForm.get('idVenta')?.touched) {
+                <div class="text-danger small mt-1">La venta es obligatoria.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-success" [disabled]="estadoForm.invalid || isLoading()">
+              <i class="fa-solid fa-forward me-1"></i>Avanzar estado
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-  <button type="submit" [disabled]="buscarForm.invalid">Buscar</button>
-</form>
 
-@if (ventas().length === 0) {
-  <p>No hay ventas para mostrar</p>
-} @else {
-  <ul>
-    @for (venta of ventas(); track venta.idVenta) {
-      <li>
-        <strong>{{ venta.idVenta }}</strong>
-        ({{ venta.fecha }}): {{ venta.estadoPedido }}, {{ venta.precio }} {{ venta.moneda }}
-        <ul>
-          @for (item of venta.items; track item.idItemVenta) {
-            <li>ISBN {{ item.isbnLibro }}: {{ item.cantidad }} x {{ item.precioUnitario }} = {{ item.precioTotal }}</li>
-          }
-        </ul>
-      </li>
+  @if (usuarioConsultado()) {
+    @if (ventas().length === 0) {
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-box-open fa-4x mb-3"></i>
+        <p class="h5">Este usuario no tiene ventas</p>
+      </div>
+    } @else {
+      <div class="row g-3">
+        @for (venta of ventas(); track venta.idVenta) {
+          <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="small text-break"><i class="fa-solid fa-receipt me-2"></i>{{ venta.idVenta }}</span>
+                <span class="badge {{ badgeEstado(venta.estadoPedido) }}">{{ venta.estadoPedido }}</span>
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                  <span class="text-muted"><i class="fa-solid fa-calendar me-1"></i>{{ venta.fecha }}</span>
+                  <span class="fw-semibold">{{ venta.precio | number:'1.2-2' }} {{ venta.moneda }}</span>
+                </div>
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr>
+                      <th>ISBN</th>
+                      <th class="text-center">Cantidad</th>
+                      <th class="text-end">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of venta.items; track item.idItemVenta) {
+                      <tr>
+                        <td class="small">{{ item.isbnLibro }}</td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                        <td class="text-end">{{ item.precioTotal | number:'1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     }
-  </ul>
-}
-
-<h3>Avanzar estado de una venta</h3>
-<form [formGroup]="estadoForm" (ngSubmit)="avanzarEstado()">
-  <div>
-    <label>ID de la venta:</label>
-    <input type="text" formControlName="idVenta" />
-    @if (estadoForm.get('idVenta')?.invalid && estadoForm.get('idVenta')?.touched) {
-      <div class="error">La venta es obligatoria.</div>
-    }
-  </div>
-  <button type="submit" [disabled]="estadoForm.invalid || isLoading()">Avanzar estado</button>
-</form>
-
-<div>{{ result() }}</div>
+  }
+</div>

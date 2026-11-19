@@ -1,52 +1,105 @@
-<h2>Mis compras</h2>
+<div class="container mt-4">
+  <h1 class="h3 mb-4">
+    <i class="fa-solid fa-bag-shopping me-2"></i>Mis compras
+  </h1>
 
-@if (ventas().length === 0) {
-  <p>Todavía no tienes compras</p>
-} @else {
-  <ul>
-    @for (venta of ventas(); track venta.idVenta) {
-      <li>
-        <strong>{{ venta.idVenta }}</strong>
-        ({{ venta.fecha }}): {{ venta.estadoPedido }}, {{ venta.precio }} {{ venta.moneda }}
-        <ul>
-          @for (item of venta.items; track item.idItemVenta) {
-            <li>ISBN {{ item.isbnLibro }}: {{ item.cantidad }} x {{ item.precioUnitario }} = {{ item.precioTotal }}</li>
-          }
-        </ul>
-      </li>
-    }
-  </ul>
-}
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <span class="spinner-border mb-3"></span>
+      <p class="h5">Cargando compras...</p>
+    </div>
+  } @else if (ventas().length === 0) {
+    <div class="text-center py-5 text-muted">
+      <i class="fa-solid fa-box-open fa-4x mb-3"></i>
+      <p class="h5">Todavía no tienes compras</p>
+    </div>
+  } @else {
+    <div class="row g-3 mb-4">
+      @for (venta of ventas(); track venta.idVenta) {
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="small text-break"><i class="fa-solid fa-receipt me-2"></i>{{ venta.idVenta }}</span>
+              <span class="badge {{ badgeEstado(venta.estadoPedido) }}">{{ venta.estadoPedido }}</span>
+            </div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted"><i class="fa-solid fa-calendar me-1"></i>{{ venta.fecha }}</span>
+                <span class="fw-semibold">{{ venta.precio | number:'1.2-2' }} {{ venta.moneda }}</span>
+              </div>
+              <table class="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>ISBN</th>
+                    <th class="text-center">Cantidad</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of venta.items; track item.idItemVenta) {
+                    <tr>
+                      <td class="small">{{ item.isbnLibro }}</td>
+                      <td class="text-center">{{ item.cantidad }}</td>
+                      <td class="text-end">{{ item.precioTotal | number:'1.2-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
 
-<h3>Cancelar compra</h3>
-<form [formGroup]="cancelarForm" (ngSubmit)="cancelar()">
-  <div>
-    <label>ID de la venta:</label>
-    <input type="text" formControlName="idVenta" />
-    @if (cancelarForm.get('idVenta')?.invalid && cancelarForm.get('idVenta')?.touched) {
-      <div class="error">La venta es obligatoria.</div>
-    }
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-ban me-2"></i>Cancelar compra</div>
+        <div class="card-body">
+          <p class="small text-muted">Solo se pueden cancelar las compras que están en PREPARANDO.</p>
+          <form [formGroup]="cancelarForm" (ngSubmit)="cancelar()">
+            <div class="mb-3">
+              <label class="form-label">ID de la venta</label>
+              <input type="text" formControlName="idVenta" class="form-control" />
+              @if (cancelarForm.get('idVenta')?.invalid && cancelarForm.get('idVenta')?.touched) {
+                <div class="text-danger small mt-1">La venta es obligatoria.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-outline-danger" [disabled]="cancelarForm.invalid || isLoading()">
+              <i class="fa-solid fa-ban me-1"></i>Cancelar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="fa-solid fa-money-bill-transfer me-2"></i>Solicitar reembolso</div>
+        <div class="card-body">
+          <p class="small text-muted">Aplica para compras canceladas o entregadas hace máximo 30 días.</p>
+          <form [formGroup]="reembolsoForm" (ngSubmit)="solicitarReembolso()">
+            <div class="mb-3">
+              <label class="form-label">ID de la venta</label>
+              <input type="text" formControlName="idVenta" class="form-control" />
+              @if (reembolsoForm.get('idVenta')?.invalid && reembolsoForm.get('idVenta')?.touched) {
+                <div class="text-danger small mt-1">La venta es obligatoria.</div>
+              }
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Motivo</label>
+              <input type="text" formControlName="motivo" class="form-control" />
+              @if (reembolsoForm.get('motivo')?.invalid && reembolsoForm.get('motivo')?.touched) {
+                <div class="text-danger small mt-1">El motivo es obligatorio.</div>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="reembolsoForm.invalid || isLoading()">
+              <i class="fa-solid fa-paper-plane me-1"></i>Solicitar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-  <button type="submit" [disabled]="cancelarForm.invalid || isLoading()">Cancelar</button>
-</form>
-
-<h3>Solicitar reembolso</h3>
-<form [formGroup]="reembolsoForm" (ngSubmit)="solicitarReembolso()">
-  <div>
-    <label>ID de la venta:</label>
-    <input type="text" formControlName="idVenta" />
-    @if (reembolsoForm.get('idVenta')?.invalid && reembolsoForm.get('idVenta')?.touched) {
-      <div class="error">La venta es obligatoria.</div>
-    }
-  </div>
-  <div>
-    <label>Motivo:</label>
-    <input type="text" formControlName="motivo" />
-    @if (reembolsoForm.get('motivo')?.invalid && reembolsoForm.get('motivo')?.touched) {
-      <div class="error">El motivo es obligatorio.</div>
-    }
-  </div>
-  <button type="submit" [disabled]="reembolsoForm.invalid || isLoading()">Solicitar</button>
-</form>
-
-<div>{{ result() }}</div>
+</div>
