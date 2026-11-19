@@ -71,10 +71,15 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">ID del autor</label>
-          <input formControlName="idAutor" class="form-control" placeholder="ID del autor" />
+          <label class="form-label">Autor</label>
+          <select formControlName="idAutor" class="form-select">
+            <option value="">Selecciona el autor</option>
+            @for (autor of autores(); track autor.idAutor) {
+              <option [value]="autor.idAutor">{{ autor.nombreAutor }}</option>
+            }
+          </select>
           @if (libroForm.controls.idAutor.invalid && libroForm.controls.idAutor.touched) {
-            <div class="text-danger small mt-1">El ID del autor es obligatorio (máximo 36 caracteres)</div>
+            <div class="text-danger small mt-1">El autor es obligatorio</div>
           }
         </div>
 
@@ -140,10 +145,15 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">ID de la editorial</label>
-          <input formControlName="idEditorial" class="form-control" placeholder="ID de la editorial" />
+          <label class="form-label">Editorial</label>
+          <select formControlName="idEditorial" class="form-select">
+            <option value="">Selecciona la editorial</option>
+            @for (editorial of editoriales(); track editorial.idEditorial) {
+              <option [value]="editorial.idEditorial">{{ editorial.nombreEditorial }}</option>
+            }
+          </select>
           @if (libroForm.controls.idEditorial.invalid && libroForm.controls.idEditorial.touched) {
-            <div class="text-danger small mt-1">El ID de la editorial es obligatorio</div>
+            <div class="text-danger small mt-1">La editorial es obligatoria</div>
           }
         </div>
 
@@ -194,293 +204,4 @@
     </div>
   </div>
 
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar título</div>
-    <div class="card-body">
-      <form [formGroup]="tituloForm" (ngSubmit)="actualizarTitulo()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (tituloForm.controls.idLibro.invalid && tituloForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Nuevo título</label>
-          <input formControlName="titulo" class="form-control" placeholder="Nuevo título" />
-          @if (tituloForm.controls.titulo.invalid && tituloForm.controls.titulo.touched) {
-            <div class="text-danger small mt-1">El título es obligatorio (máximo 150 caracteres)</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar título</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar descripción</div>
-    <div class="card-body">
-      <form [formGroup]="descripcionForm" (ngSubmit)="actualizarDescripcion()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (descripcionForm.controls.idLibro.invalid && descripcionForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Nueva descripción</label>
-          <input formControlName="descripcion" class="form-control" placeholder="Nueva descripción" />
-          @if (descripcionForm.controls.descripcion.invalid && descripcionForm.controls.descripcion.touched) {
-            <div class="text-danger small mt-1">Máximo 2000 caracteres</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar descripción</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar número de páginas</div>
-    <div class="card-body">
-      <form [formGroup]="numeroPaginasForm" (ngSubmit)="actualizarNumeroPaginas()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (numeroPaginasForm.controls.idLibro.invalid && numeroPaginasForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Número de páginas</label>
-          <input type="number" formControlName="numeroPaginas" class="form-control" placeholder="Número de páginas" />
-          @if (numeroPaginasForm.controls.numeroPaginas.invalid && numeroPaginasForm.controls.numeroPaginas.touched) {
-            <div class="text-danger small mt-1">El número de páginas es obligatorio (mínimo 1)</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar número de páginas</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar precio</div>
-    <div class="card-body">
-      <form [formGroup]="precioForm" (ngSubmit)="actualizarPrecio()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (precioForm.controls.idLibro.invalid && precioForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Precio</label>
-          <input type="number" formControlName="precio" class="form-control" placeholder="Precio" />
-          @if (precioForm.controls.precio.invalid && precioForm.controls.precio.touched) {
-            <div class="text-danger small mt-1">El precio es obligatorio (mínimo 0)</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Moneda</label>
-          <select formControlName="moneda" class="form-select">
-            <option value="">Selecciona la moneda</option>
-            @for (moneda of monedas; track moneda) {
-              <option [value]="moneda">{{ moneda }}</option>
-            }
-          </select>
-          @if (precioForm.controls.moneda.invalid && precioForm.controls.moneda.touched) {
-            <div class="text-danger small mt-1">La moneda es obligatoria</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar precio</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar stock</div>
-    <div class="card-body">
-      <form [formGroup]="stockForm" (ngSubmit)="actualizarStock()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (stockForm.controls.idLibro.invalid && stockForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Stock</label>
-          <input type="number" formControlName="stock" class="form-control" placeholder="Stock" />
-          @if (stockForm.controls.stock.invalid && stockForm.controls.stock.touched) {
-            <div class="text-danger small mt-1">El stock es obligatorio (mínimo 0)</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar stock</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar edición</div>
-    <div class="card-body">
-      <form [formGroup]="edicionForm" (ngSubmit)="actualizarEdicion()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (edicionForm.controls.idLibro.invalid && edicionForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Edición</label>
-          <input formControlName="edicion" class="form-control" placeholder="Edición" />
-          @if (edicionForm.controls.edicion.invalid && edicionForm.controls.edicion.touched) {
-            <div class="text-danger small mt-1">Máximo 100 caracteres</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar edición</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar editorial del libro</div>
-    <div class="card-body">
-      <form [formGroup]="editorialLibroForm" (ngSubmit)="actualizarEditorial()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (editorialLibroForm.controls.idLibro.invalid && editorialLibroForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">ID de la editorial</label>
-          <input formControlName="idEditorial" class="form-control" placeholder="ID de la editorial" />
-          @if (editorialLibroForm.controls.idEditorial.invalid && editorialLibroForm.controls.idEditorial.touched) {
-            <div class="text-danger small mt-1">El ID de la editorial es obligatorio</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar editorial</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar fecha de publicación</div>
-    <div class="card-body">
-      <form [formGroup]="fechaPublicacionForm" (ngSubmit)="actualizarFechaPublicacion()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (fechaPublicacionForm.controls.idLibro.invalid && fechaPublicacionForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Fecha de publicación</label>
-          <input type="date" formControlName="fechaPublicacion" class="form-control" />
-          @if (fechaPublicacionForm.controls.fechaPublicacion.invalid && fechaPublicacionForm.controls.fechaPublicacion.touched) {
-            <div class="text-danger small mt-1">La fecha de publicación es obligatoria</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar fecha</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar categoría</div>
-    <div class="card-body">
-      <form [formGroup]="categoriaForm" (ngSubmit)="actualizarCategoria()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (categoriaForm.controls.idLibro.invalid && categoriaForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Categoría</label>
-          <select formControlName="categoria" class="form-select">
-            <option value="">Selecciona la categoría</option>
-            @for (categoria of categorias; track categoria) {
-              <option [value]="categoria">{{ categoria }}</option>
-            }
-          </select>
-          @if (categoriaForm.controls.categoria.invalid && categoriaForm.controls.categoria.touched) {
-            <div class="text-danger small mt-1">La categoría es obligatoria</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar categoría</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-pen me-2"></i>Actualizar imagen</div>
-    <div class="card-body">
-      <form [formGroup]="imagenForm" (ngSubmit)="actualizarImagen()">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (imagenForm.controls.idLibro.invalid && imagenForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Imagen</label>
-          <input formControlName="imagen" class="form-control" placeholder="Imagen" />
-          @if (imagenForm.controls.imagen.invalid && imagenForm.controls.imagen.touched) {
-            <div class="text-danger small mt-1">Máximo 500 caracteres</div>
-          }
-        </div>
-
-        <button type="submit" class="btn btn-primary" [disabled]="isLoading()">Actualizar imagen</button>
-      </form>
-    </div>
-  </div>
-
-  <div class="card mb-4">
-    <div class="card-header"><i class="fa-solid fa-gears me-2"></i>Acciones sobre el libro</div>
-    <div class="card-body">
-      <form [formGroup]="accionesForm">
-        <div class="mb-3">
-          <label class="form-label">ID del libro</label>
-          <input formControlName="idLibro" class="form-control" placeholder="ID del libro" />
-          @if (accionesForm.controls.idLibro.invalid && accionesForm.controls.idLibro.touched) {
-            <div class="text-danger small mt-1">El ID del libro es obligatorio</div>
-          }
-        </div>
-
-        <div class="d-flex flex-wrap gap-2">
-          <button type="button" class="btn btn-warning" (click)="agotar()" [disabled]="isLoading()">Agotar</button>
-          <button type="button" class="btn btn-success" (click)="reactivar()" [disabled]="isLoading()">Reactivar</button>
-          <button type="button" class="btn btn-secondary" (click)="descontinuar()" [disabled]="isLoading()">Descontinuar</button>
-          <button type="button" class="btn btn-outline-danger" (click)="eliminar()" [disabled]="isLoading()">Eliminar</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </div>

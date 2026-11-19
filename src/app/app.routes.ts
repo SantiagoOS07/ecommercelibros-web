@@ -4,6 +4,7 @@ import { Login } from './componentes/login/login';
 import { Registro } from './componentes/registro/registro';
 import { Catalogo } from './componentes/catalogo/catalogo';
 import { DetalleLibro } from './componentes/detalle-libro/detalle-libro';
+import { EditarLibro } from './componentes/editar-libro/editar-libro';
 import { Carrito } from './componentes/carrito/carrito';
 import { MisCompras } from './componentes/mis-compras/mis-compras';
 import { Perfil } from './componentes/perfil/perfil';
@@ -19,6 +20,12 @@ export const routes: Routes = [
   { path: 'registro', component: Registro, canActivate: [guestGuard] },
   { path: 'catalogo', component: Catalogo },
   { path: 'catalogo/:id', component: DetalleLibro },
+  {
+    path: 'catalogo/:id/editar',
+    component: EditarLibro,
+    canActivate: [rolGuard],
+    data: { roles: ['ADMINISTRADOR', 'PROVEEDOR'] }
+  },
   { path: 'carrito', component: Carrito, canActivate: [authGuard] },
   { path: 'mis-compras', component: MisCompras, canActivate: [authGuard] },
   { path: 'perfil', component: Perfil, canActivate: [authGuard] },

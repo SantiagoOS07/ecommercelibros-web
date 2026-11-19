@@ -3,145 +3,82 @@
     <i class="fa-solid fa-users me-2"></i>Gestión de usuarios
   </h1>
 
-  @if (usuarios().length === 0) {
-    <div class="text-center py-5 text-muted">
-      <i class="fa-solid fa-user-slash fa-3x mb-3"></i>
-      <p class="h5">No hay usuarios para mostrar.</p>
+  <div class="input-group mb-4">
+    <span class="input-group-text">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </span>
+    <input #caja type="text" class="form-control"
+           placeholder="Escribe para buscar por nombre o correo"
+           (input)="escribir(caja.value)" />
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <i class="fa-solid fa-list me-2"></i>Usuarios registrados ({{ filtrados().length }} de {{ usuarios().length }})
     </div>
-  } @else {
-    <div class="card shadow-sm mb-4">
-      <div class="card-header">
-        <i class="fa-solid fa-list me-2"></i>Usuarios registrados ({{ usuarios().length }})
+    @if (filtrados().length === 0) {
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-user-slash fa-3x mb-3"></i>
+        <p class="h5">No hay usuarios para mostrar.</p>
       </div>
+    } @else {
       <div class="table-responsive">
         <table class="table table-striped table-hover align-middle mb-0">
           <thead>
             <tr>
-              <th>Id</th>
               <th>Nombre</th>
               <th>Correo</th>
               <th>Rol</th>
               <th>Estado</th>
+              <th class="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @for (usuario of usuarios(); track usuario.idUsuario) {
+            @for (usuario of filtrados(); track usuario.idUsuario) {
               <tr>
-                <td class="small text-break">{{ usuario.idUsuario }}</td>
-                <td>{{ usuario.nombre }}</td>
+                <td>
+                  {{ usuario.nombre }}
+                  <div class="small text-muted text-break">{{ usuario.idUsuario }}</div>
+                </td>
                 <td>{{ usuario.correo }}</td>
-                <td><span class="badge {{ badgeRol(usuario.rolUsuario) }}">{{ usuario.rolUsuario }}</span></td>
+                <td>
+                  @if (esActual(usuario)) {
+                    <span class="badge {{ badgeRol(usuario.rolUsuario) }}">{{ usuario.rolUsuario }}</span>
+                  } @else {
+                    <select #selRol class="form-select form-select-sm w-auto"
+                            [disabled]="isLoading()"
+                            (change)="cambiarRol(usuario, selRol.value)">
+                      @for (rol of roles; track rol) {
+                        <option [value]="rol" [selected]="rol === usuario.rolUsuario">{{ rol }}</option>
+                      }
+                    </select>
+                  }
+                </td>
                 <td><span class="badge {{ badgeEstado(usuario.estadoUsuario) }}">{{ usuario.estadoUsuario }}</span></td>
+                <td class="text-end">
+                  @if (esActual(usuario)) {
+                    <span class="small text-muted fst-italic">Tu cuenta</span>
+                  } @else if (confirmando() === usuario.idUsuario) {
+                    <div class="d-inline-flex align-items-center gap-2">
+                      <span class="small text-danger fw-semibold">¿Desactivar?</span>
+                      <button type="button" class="btn btn-danger btn-sm" (click)="eliminar(usuario)" [disabled]="isLoading()">Sí</button>
+                      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelarEliminacion()">No</button>
+                    </div>
+                  } @else if (usuario.estadoUsuario === 'INACTIVO') {
+                    <button type="button" class="btn btn-outline-success btn-sm" (click)="reactivar(usuario)" [disabled]="isLoading()">
+                      <i class="fa-solid fa-rotate-left me-1"></i>Reactivar
+                    </button>
+                  } @else {
+                    <button type="button" class="btn btn-outline-danger btn-sm" (click)="pedirEliminacion(usuario)" [disabled]="isLoading()">
+                      <i class="fa-solid fa-user-slash me-1"></i>Desactivar
+                    </button>
+                  }
+                </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
-    </div>
-  }
-
-  <div class="row g-3">
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-magnifying-glass me-2"></i>Consultar por correo</div>
-        <div class="card-body">
-          <form [formGroup]="correoForm" (ngSubmit)="consultarPorCorreo()">
-            <div class="mb-3">
-              <label class="form-label">Correo electrónico</label>
-              <input type="email" formControlName="correo" class="form-control" placeholder="correo@ejemplo.com" />
-              @if (correoForm.get('correo')?.invalid && correoForm.get('correo')?.touched) {
-                <div class="text-danger small mt-1">Ingresa un correo electrónico válido.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-primary" [disabled]="correoForm.invalid || isLoading()">
-              <i class="fa-solid fa-magnifying-glass me-1"></i>Consultar
-            </button>
-          </form>
-          @if (usuarioEncontrado(); as u) {
-            <div class="alert alert-info mt-3 mb-0">
-              <p class="fw-semibold mb-1">{{ u.nombre }}</p>
-              <p class="small text-break mb-1">Id: {{ u.idUsuario }}</p>
-              <p class="small mb-1">Correo: {{ u.correo }}</p>
-              <p class="small mb-1">Teléfono: {{ u.telefono }}</p>
-              <p class="small mb-2">Dirección: {{ u.direccion }}</p>
-              <span class="badge {{ badgeRol(u.rolUsuario) }} me-1">{{ u.rolUsuario }}</span>
-              <span class="badge {{ badgeEstado(u.estadoUsuario) }}">{{ u.estadoUsuario }}</span>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-user-gear me-2"></i>Cambiar rol</div>
-        <div class="card-body">
-          <form [formGroup]="rolForm" (ngSubmit)="cambiarRol()">
-            <div class="mb-3">
-              <label class="form-label">Id del usuario</label>
-              <input type="text" formControlName="idUsuario" class="form-control" />
-              @if (rolForm.get('idUsuario')?.invalid && rolForm.get('idUsuario')?.touched) {
-                <div class="text-danger small mt-1">El id del usuario es obligatorio.</div>
-              }
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nuevo rol</label>
-              <select formControlName="rolUsuario" class="form-select">
-                <option value="" disabled>Selecciona un rol</option>
-                @for (rol of roles; track rol) {
-                  <option [value]="rol">{{ rol }}</option>
-                }
-              </select>
-              @if (rolForm.get('rolUsuario')?.invalid && rolForm.get('rolUsuario')?.touched) {
-                <div class="text-danger small mt-1">El rol es obligatorio.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-primary" [disabled]="rolForm.invalid || isLoading()">
-              <i class="fa-solid fa-floppy-disk me-1"></i>Cambiar rol
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-user-check me-2"></i>Reactivar usuario</div>
-        <div class="card-body">
-          <form [formGroup]="reactivarForm" (ngSubmit)="reactivar()">
-            <div class="mb-3">
-              <label class="form-label">Id del usuario</label>
-              <input type="text" formControlName="idUsuario" class="form-control" />
-              @if (reactivarForm.get('idUsuario')?.invalid && reactivarForm.get('idUsuario')?.touched) {
-                <div class="text-danger small mt-1">El id del usuario es obligatorio.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-success" [disabled]="reactivarForm.invalid || isLoading()">
-              <i class="fa-solid fa-user-check me-1"></i>Reactivar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card h-100 border-danger">
-        <div class="card-header text-danger"><i class="fa-solid fa-user-xmark me-2"></i>Eliminar usuario</div>
-        <div class="card-body">
-          <form [formGroup]="eliminarForm" (ngSubmit)="eliminar()">
-            <div class="mb-3">
-              <label class="form-label">Id del usuario</label>
-              <input type="text" formControlName="idUsuario" class="form-control" />
-              @if (eliminarForm.get('idUsuario')?.invalid && eliminarForm.get('idUsuario')?.touched) {
-                <div class="text-danger small mt-1">El id del usuario es obligatorio.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-outline-danger" [disabled]="eliminarForm.invalid || isLoading()">
-              <i class="fa-solid fa-trash me-1"></i>Eliminar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+    }
   </div>
 </div>

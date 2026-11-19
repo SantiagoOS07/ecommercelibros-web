@@ -1,13 +1,13 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Observable, debounceTime, distinctUntilChanged } from 'rxjs';
 import { UsuariosService } from '../../servicios/usuarios';
+import { AuthService } from '../../servicios/auth';
 import { NotificacionesService } from '../../servicios/notificaciones';
 import { RolUsuario, UsuarioResponse } from '../../modelos/usuario';
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [],
   selector: 'app-gestion-usuarios',
   styleUrl: './gestion-usuarios.css',
   templateUrl: './gestion-usuarios.html',
@@ -16,29 +16,31 @@ export class GestionUsuarios {
   private usuariosService = inject(UsuariosService);
   private avisos = inject(NotificacionesService);
   private destroyRef = inject(DestroyRef);
-  private formBuilder = inject(FormBuilder);
+  private uidActual = inject(AuthService).getUid();
+
+  readonly roles: RolUsuario[] = ['CLIENTE', 'PROVEEDOR', 'ADMINISTRADOR'];
 
   usuarios = signal<UsuarioResponse[]>([]);
-  usuarioEncontrado = signal<UsuarioResponse | null>(null);
+  confirmando = signal<string | null>(null);
+  texto = signal('');
   isLoading = signal(false);
 
-  roles: RolUsuario[] = ['CLIENTE', 'PROVEEDOR', 'ADMINISTRADOR'];
+  busqueda = toSignal(
+    toObservable(this.texto).pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ),
+    { initialValue: '' }
+  );
 
-  correoForm = this.formBuilder.group({
-    correo: ['', [Validators.required, Validators.email]]
-  });
-
-  rolForm = this.formBuilder.group({
-    idUsuario: ['', Validators.required],
-    rolUsuario: ['', Validators.required]
-  });
-
-  reactivarForm = this.formBuilder.group({
-    idUsuario: ['', Validators.required]
-  });
-
-  eliminarForm = this.formBuilder.group({
-    idUsuario: ['', Validators.required]
+  filtrados = computed(() => {
+    const termino = this.busqueda().trim().toLowerCase();
+    if (!termino) {
+      return this.usuarios();
+    }
+    return this.usuarios().filter(usuario =>
+      usuario.nombre.toLowerCase().includes(termino) || usuario.correo.toLowerCase().includes(termino)
+    );
   });
 
   constructor() {
@@ -57,52 +59,36 @@ export class GestionUsuarios {
       });
   }
 
-  consultarPorCorreo(): void {
-    if (this.correoForm.invalid) return;
-    this.isLoading.set(true);
-
-    this.usuariosService.consultarPorCorreo(this.correoForm.value.correo!.trim())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (usuario) => {
-          this.usuarioEncontrado.set(usuario);
-          this.avisos.exito('Usuario encontrado');
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          this.usuarioEncontrado.set(null);
-          this.avisos.error(this.mensajeError(err.status));
-          this.isLoading.set(false);
-        }
-      });
+  escribir(valor: string): void {
+    this.texto.set(valor);
   }
 
-  cambiarRol(): void {
-    if (this.rolForm.invalid) return;
-    const { idUsuario, rolUsuario } = this.rolForm.value;
-    this.ejecutar(
-      this.usuariosService.actualizarRol(idUsuario!.trim(), { rolUsuario: rolUsuario as RolUsuario }),
-      'Rol actualizado'
-    );
-    this.rolForm.reset({ idUsuario: '', rolUsuario: '' });
+  esActual(usuario: UsuarioResponse): boolean {
+    return usuario.idUsuario === this.uidActual;
   }
 
-  reactivar(): void {
-    if (this.reactivarForm.invalid) return;
+  cambiarRol(usuario: UsuarioResponse, rol: string): void {
+    if (rol === usuario.rolUsuario) return;
     this.ejecutar(
-      this.usuariosService.reactivar(this.reactivarForm.value.idUsuario!.trim()),
-      'Usuario reactivado'
+      this.usuariosService.actualizarRol(usuario.idUsuario, { rolUsuario: rol as RolUsuario }),
+      `Rol de ${usuario.nombre} actualizado a ${rol}`
     );
-    this.reactivarForm.reset();
   }
 
-  eliminar(): void {
-    if (this.eliminarForm.invalid) return;
-    this.ejecutar(
-      this.usuariosService.eliminar(this.eliminarForm.value.idUsuario!.trim()),
-      'Usuario desactivado'
-    );
-    this.eliminarForm.reset();
+  reactivar(usuario: UsuarioResponse): void {
+    this.ejecutar(this.usuariosService.reactivar(usuario.idUsuario), `${usuario.nombre} fue reactivado`);
+  }
+
+  pedirEliminacion(usuario: UsuarioResponse): void {
+    this.confirmando.set(usuario.idUsuario);
+  }
+
+  cancelarEliminacion(): void {
+    this.confirmando.set(null);
+  }
+
+  eliminar(usuario: UsuarioResponse): void {
+    this.ejecutar(this.usuariosService.eliminar(usuario.idUsuario), `${usuario.nombre} fue desactivado`);
   }
 
   badgeRol(rol: string): string {
@@ -127,11 +113,13 @@ export class GestionUsuarios {
         next: () => {
           this.avisos.exito(mensaje);
           this.isLoading.set(false);
+          this.confirmando.set(null);
           this.cargar();
         },
         error: (err) => {
           this.avisos.error(this.mensajeError(err.status));
           this.isLoading.set(false);
+          this.cargar();
         }
       });
   }

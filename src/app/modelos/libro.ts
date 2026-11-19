@@ -2,6 +2,26 @@ export type EstadoLibro = 'DISPONIBLE' | 'AGOTADO' | 'DESCONTINUADO';
 export type CategoriaLibro = 'NOVELA' | 'CIENCIA_FICCION' | 'FANTASIA' | 'MISTERIO' | 'ROMANCE' | 'HISTORIA' | 'FILOSOFIA' | 'CIENCIA' | 'TECNOLOGIA' | 'PROGRAMACION' | 'BIOGRAFIA' | 'POESIA' | 'INFANTIL' | 'JUVENIL' | 'AUTOAYUDA' | 'NEGOCIOS' | 'ARTE' | 'RELIGION' | 'SALUD' | 'EDUCACION';
 export type Moneda = 'COP' | 'USD';
 
+export const ESTADOS_LIBRO: EstadoLibro[] = ['DISPONIBLE', 'AGOTADO', 'DESCONTINUADO'];
+export const MONEDAS: Moneda[] = ['COP', 'USD'];
+export const CATEGORIAS_LIBRO: CategoriaLibro[] = [
+    'NOVELA', 'CIENCIA_FICCION', 'FANTASIA', 'MISTERIO', 'ROMANCE',
+    'HISTORIA', 'FILOSOFIA', 'CIENCIA', 'TECNOLOGIA', 'PROGRAMACION',
+    'BIOGRAFIA', 'POESIA', 'INFANTIL', 'JUVENIL', 'AUTOAYUDA',
+    'NEGOCIOS', 'ARTE', 'RELIGION', 'SALUD', 'EDUCACION'
+];
+
+export interface FiltroCatalogo {
+    pagina: number;
+    tamanio: number;
+    palabra: string;
+    estado: EstadoLibro | '';
+    categoria: CategoriaLibro | '';
+    moneda: Moneda | '';
+    precioMin: string;
+    precioMax: string;
+}
+
 export interface LibroDetalleResponse {
     idLibro: string;
     titulo: string;

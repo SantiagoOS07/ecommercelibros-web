@@ -38,6 +38,10 @@ export class DetalleLibro {
     { initialValue: null }
   );
 
+  puedeGestionar(): boolean {
+    return this.authService.tieneRol(['ADMINISTRADOR', 'PROVEEDOR']);
+  }
+
   comprar(libro: LibroResponse): void {
     if (!this.authService.isAuthenticated()) {
       this.avisos.info('Inicia sesión para comprar');

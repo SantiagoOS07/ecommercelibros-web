@@ -12,25 +12,91 @@
     <div class="row g-3 mb-4">
       @for (autor of autores(); track autor.idAutor) {
         <div class="col-md-6 col-lg-4">
-          <div class="card h-100 shadow-sm">
+          <div class="card h-100 shadow-sm" [class.border-primary]="editando()?.idAutor === autor.idAutor">
             <div class="card-header">
               <span class="fw-semibold">{{ autor.nombreAutor }}</span>
               <p class="small text-muted text-break mb-0">Id: {{ autor.idAutor }}</p>
             </div>
             <div class="card-body">
-              <p class="small mb-0">
-                @if (autor.biografia) {
-                  {{ autor.biografia }}
-                } @else {
-                  <span class="text-muted fst-italic">Sin biografía</span>
+              @if (estaEditando(autor, 'datos')) {
+                <form [formGroup]="datosForm" (ngSubmit)="guardarDatos(autor)">
+                  <div class="mb-2">
+                    <label class="form-label small mb-1">Nombre</label>
+                    <input type="text" formControlName="nombreAutor" class="form-control form-control-sm" />
+                    @if (datosForm.get('nombreAutor')?.invalid && datosForm.get('nombreAutor')?.touched) {
+                      <div class="text-danger small mt-1">El nombre es obligatorio y tiene máximo 150 caracteres.</div>
+                    }
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label small mb-1">Biografía</label>
+                    <textarea formControlName="biografia" class="form-control form-control-sm" rows="4"></textarea>
+                    @if (datosForm.get('biografia')?.invalid && datosForm.get('biografia')?.touched) {
+                      <div class="text-danger small mt-1">La biografía tiene máximo 2000 caracteres.</div>
+                    }
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm" [disabled]="datosForm.invalid || isLoading()">
+                      <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelar()">Cancelar</button>
+                  </div>
+                </form>
+              } @else {
+                <p class="small mb-3">
+                  @if (autor.biografia) {
+                    {{ autor.biografia }}
+                  } @else {
+                    <span class="text-muted fst-italic">Sin biografía</span>
+                  }
+                </p>
+              }
+              <div class="d-flex flex-wrap gap-1">
+                @for (nacionalidad of autor.nacionalidades; track nacionalidad) {
+                  <span class="badge bg-secondary d-inline-flex align-items-center">
+                    <i class="fa-solid fa-flag me-1"></i>{{ nacionalidad }}
+                    <button type="button" class="btn btn-link btn-sm p-0 ms-2 text-white lh-1"
+                            title="Quitar nacionalidad"
+                            (click)="quitarNacionalidad(autor, nacionalidad)" [disabled]="isLoading()">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </span>
                 }
-              </p>
+              </div>
             </div>
-            <div class="card-footer d-flex flex-wrap gap-1">
-              @for (nacionalidad of autor.nacionalidades; track nacionalidad) {
-                <span class="badge bg-secondary">
-                  <i class="fa-solid fa-flag me-1"></i>{{ nacionalidad }}
-                </span>
+            <div class="card-footer">
+              @if (estaEditando(autor, 'nacionalidad')) {
+                <form [formGroup]="nacionalidadForm" (ngSubmit)="agregarNacionalidad(autor)" class="d-flex flex-wrap gap-2">
+                  <select formControlName="nacionalidad" class="form-select form-select-sm flex-grow-1 w-auto">
+                    <option value="">Selecciona la nacionalidad</option>
+                    @for (nacionalidad of nacionalidadesDisponibles(autor); track nacionalidad) {
+                      <option [value]="nacionalidad">{{ nacionalidad }}</option>
+                    }
+                  </select>
+                  <button type="submit" class="btn btn-primary btn-sm" [disabled]="nacionalidadForm.invalid || isLoading()">
+                    <i class="fa-solid fa-plus me-1"></i>Agregar
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelar()">Cancelar</button>
+                </form>
+              } @else if (estaEditando(autor, 'eliminar')) {
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="small text-danger fw-semibold me-auto">¿Eliminar este autor?</span>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="eliminar(autor)" [disabled]="isLoading()">Sí, eliminar</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelar()">No</button>
+                </div>
+              } @else {
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-outline-primary btn-sm" (click)="abrirDatos(autor)" [disabled]="isLoading()">
+                    <i class="fa-solid fa-pen me-1"></i>Editar
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="abrirNacionalidad(autor)" [disabled]="isLoading()">
+                    <i class="fa-solid fa-flag me-1"></i>Nacionalidad
+                  </button>
+                  @if (auth.tieneRol(['ADMINISTRADOR'])) {
+                    <button type="button" class="btn btn-outline-danger btn-sm ms-auto" (click)="pedirEliminacion(autor)" [disabled]="isLoading()">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  }
+                </div>
               }
             </div>
           </div>
@@ -62,7 +128,12 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label">Nacionalidad</label>
-                <input type="text" formControlName="nacionalidad" class="form-control" placeholder="COLOMBIANA" />
+                <select formControlName="nacionalidad" class="form-select">
+                  <option value="">Selecciona la nacionalidad</option>
+                  @for (nacionalidad of nacionalidades; track nacionalidad) {
+                    <option [value]="nacionalidad">{{ nacionalidad }}</option>
+                  }
+                </select>
                 @if (registrarForm.get('nacionalidad')?.invalid && registrarForm.get('nacionalidad')?.touched) {
                   <div class="text-danger small mt-1">La nacionalidad es obligatoria.</div>
                 }
@@ -86,135 +157,5 @@
         </div>
       </div>
     </div>
-
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-signature me-2"></i>Cambiar nombre</div>
-        <div class="card-body">
-          <form [formGroup]="nombreForm" (ngSubmit)="actualizarNombre()">
-            <div class="mb-3">
-              <label class="form-label">Id del autor</label>
-              <input type="text" formControlName="idAutor" class="form-control" />
-              @if (nombreForm.get('idAutor')?.invalid && nombreForm.get('idAutor')?.touched) {
-                <div class="text-danger small mt-1">El id del autor es obligatorio.</div>
-              }
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nuevo nombre</label>
-              <input type="text" formControlName="nombreAutor" class="form-control" />
-              @if (nombreForm.get('nombreAutor')?.invalid && nombreForm.get('nombreAutor')?.touched) {
-                <div class="text-danger small mt-1">El nombre es obligatorio.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-primary" [disabled]="nombreForm.invalid || isLoading()">
-              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-book-open-reader me-2"></i>Cambiar biografía</div>
-        <div class="card-body">
-          <form [formGroup]="biografiaForm" (ngSubmit)="actualizarBiografia()">
-            <div class="mb-3">
-              <label class="form-label">Id del autor</label>
-              <input type="text" formControlName="idAutor" class="form-control" />
-              @if (biografiaForm.get('idAutor')?.invalid && biografiaForm.get('idAutor')?.touched) {
-                <div class="text-danger small mt-1">El id del autor es obligatorio.</div>
-              }
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nueva biografía</label>
-              <textarea formControlName="biografia" class="form-control" rows="3"></textarea>
-              @if (biografiaForm.get('biografia')?.invalid && biografiaForm.get('biografia')?.touched) {
-                <div class="text-danger small mt-1">La biografía tiene máximo 2000 caracteres.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-primary" [disabled]="biografiaForm.invalid || isLoading()">
-              <i class="fa-solid fa-floppy-disk me-1"></i>Guardar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-flag me-2"></i>Agregar nacionalidad</div>
-        <div class="card-body">
-          <form [formGroup]="agregarNacionalidadForm" (ngSubmit)="agregarNacionalidad()">
-            <div class="mb-3">
-              <label class="form-label">Id del autor</label>
-              <input type="text" formControlName="idAutor" class="form-control" />
-              @if (agregarNacionalidadForm.get('idAutor')?.invalid && agregarNacionalidadForm.get('idAutor')?.touched) {
-                <div class="text-danger small mt-1">El id del autor es obligatorio.</div>
-              }
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nacionalidad</label>
-              <input type="text" formControlName="nacionalidad" class="form-control" placeholder="MEXICANA" />
-              @if (agregarNacionalidadForm.get('nacionalidad')?.invalid && agregarNacionalidadForm.get('nacionalidad')?.touched) {
-                <div class="text-danger small mt-1">La nacionalidad es obligatoria.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-success" [disabled]="agregarNacionalidadForm.invalid || isLoading()">
-              <i class="fa-solid fa-plus me-1"></i>Agregar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header"><i class="fa-solid fa-flag me-2"></i>Quitar nacionalidad</div>
-        <div class="card-body">
-          <form [formGroup]="quitarNacionalidadForm" (ngSubmit)="quitarNacionalidad()">
-            <div class="mb-3">
-              <label class="form-label">Id del autor</label>
-              <input type="text" formControlName="idAutor" class="form-control" />
-              @if (quitarNacionalidadForm.get('idAutor')?.invalid && quitarNacionalidadForm.get('idAutor')?.touched) {
-                <div class="text-danger small mt-1">El id del autor es obligatorio.</div>
-              }
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nacionalidad</label>
-              <input type="text" formControlName="nacionalidad" class="form-control" placeholder="MEXICANA" />
-              @if (quitarNacionalidadForm.get('nacionalidad')?.invalid && quitarNacionalidadForm.get('nacionalidad')?.touched) {
-                <div class="text-danger small mt-1">La nacionalidad es obligatoria.</div>
-              }
-            </div>
-            <button type="submit" class="btn btn-outline-warning" [disabled]="quitarNacionalidadForm.invalid || isLoading()">
-              <i class="fa-solid fa-minus me-1"></i>Quitar
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    @if (auth.tieneRol(['ADMINISTRADOR'])) {
-      <div class="col-md-6">
-        <div class="card h-100 border-danger">
-          <div class="card-header text-danger"><i class="fa-solid fa-trash me-2"></i>Eliminar autor</div>
-          <div class="card-body">
-            <form [formGroup]="eliminarForm" (ngSubmit)="eliminar()">
-              <div class="mb-3">
-                <label class="form-label">Id del autor</label>
-                <input type="text" formControlName="idAutor" class="form-control" />
-                @if (eliminarForm.get('idAutor')?.invalid && eliminarForm.get('idAutor')?.touched) {
-                  <div class="text-danger small mt-1">El id del autor es obligatorio.</div>
-                }
-              </div>
-              <button type="submit" class="btn btn-outline-danger" [disabled]="eliminarForm.invalid || isLoading()">
-                <i class="fa-solid fa-trash me-1"></i>Eliminar
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    }
   </div>
 </div>

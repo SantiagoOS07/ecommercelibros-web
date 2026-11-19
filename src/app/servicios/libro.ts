@@ -15,7 +15,7 @@ import {
     LibroResponse,
     LibroDetalleResponse
 } from '../modelos/libro';
-import { Pagina } from '../modelos/libro';
+import { FiltroCatalogo, Pagina } from '../modelos/libro';
 
 @Injectable({ providedIn: 'root' })
 export class LibrosService {
@@ -23,11 +23,26 @@ export class LibrosService {
     private url = 'http://localhost:8080/api/libros';
 
 
-    listar(pagina = 0, tamanio = 9, palabra = '') {
-        let params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
+    listar(filtro: FiltroCatalogo) {
+        let params = new HttpParams().set('pagina', filtro.pagina).set('tamanio', filtro.tamanio);
 
-        if (palabra.trim()) {
-            params = params.set('palabra', palabra.trim());
+        if (filtro.palabra.trim()) {
+            params = params.set('palabra', filtro.palabra.trim());
+        }
+        if (filtro.estado) {
+            params = params.set('estado', filtro.estado);
+        }
+        if (filtro.categoria) {
+            params = params.set('categoria', filtro.categoria);
+        }
+        if (filtro.moneda) {
+            params = params.set('moneda', filtro.moneda);
+        }
+        if (filtro.precioMin) {
+            params = params.set('precioMin', filtro.precioMin);
+        }
+        if (filtro.precioMax) {
+            params = params.set('precioMax', filtro.precioMax);
         }
 
         return this.http.get<Pagina<LibroDetalleResponse>>(this.url, { params });
