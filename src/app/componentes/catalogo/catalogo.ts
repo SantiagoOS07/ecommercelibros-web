@@ -16,7 +16,7 @@ export class Catalogo {
   private librosService = inject(LibrosService);
   private avisos = inject(NotificacionesService);
 
-  readonly tamanio = 3;
+  readonly tamanio = 9;
   pagina = signal(0);
   texto = signal('');
 

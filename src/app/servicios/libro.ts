@@ -23,7 +23,7 @@ export class LibrosService {
     private url = 'http://localhost:8080/api/libros';
 
 
-    listar(pagina = 0, tamanio = 3, palabra = '') {
+    listar(pagina = 0, tamanio = 9, palabra = '') {
         let params = new HttpParams().set('pagina', pagina).set('tamanio', tamanio);
 
         if (palabra.trim()) {
