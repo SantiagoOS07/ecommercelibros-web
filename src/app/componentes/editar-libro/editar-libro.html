@@ -137,7 +137,7 @@
           </div>
         </div>
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm mb-4">
           <div class="card-header d-flex justify-content-between align-items-center">
             <span class="fw-semibold"><i class="fa-solid fa-sliders me-2"></i>Estado del libro</span>
             <span class="badge" [class]="badgeEstado(l.estado)">{{ l.estado }}</span>
@@ -168,6 +168,72 @@
                 <i class="fa-solid fa-trash me-1"></i>Eliminar libro
               </button>
             }
+          </div>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-semibold"><i class="fa-solid fa-percent me-2"></i>Descuento</span>
+            @if (estadoDescuento(); as estado) {
+              <span class="badge {{ badgeDescuento(estado) }}">{{ estado }}</span>
+            }
+          </div>
+          <div class="card-body">
+            @if (estadoDescuento()) {
+              <div class="border rounded-3 p-2 mb-3 small">
+                <p class="mb-1 fw-semibold">-{{ l.porcentajeDescuento | number:'1.0-2' }}% · {{ l.motivoDescuento }}</p>
+                <p class="mb-1 text-muted">Del {{ l.fechaInicioDescuento }} al {{ l.fechaFinDescuento }}</p>
+                @if (l.descuentoVigente) {
+                  <p class="mb-2">
+                    Precio final: <span class="fw-semibold text-danger">{{ l.precioFinal | number:'1.2-2' }} {{ l.moneda }}</span>
+                  </p>
+                }
+                <button type="button" class="btn btn-outline-danger btn-sm" (click)="quitarDescuento()" [disabled]="isLoading()">
+                  <i class="fa-solid fa-xmark me-1"></i>Quitar descuento
+                </button>
+              </div>
+            } @else {
+              <p class="small text-muted">Este libro no tiene descuento.</p>
+            }
+
+            <form [formGroup]="descuentoForm" (ngSubmit)="aplicarDescuento()">
+              <div class="row g-2">
+                <div class="col-5">
+                  <label class="form-label small mb-1">Porcentaje</label>
+                  <div class="input-group input-group-sm">
+                    <input type="number" formControlName="porcentaje" class="form-control" />
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
+                <div class="col-7">
+                  <label class="form-label small mb-1">Motivo</label>
+                  <input formControlName="motivo" class="form-control form-control-sm" placeholder="Temporada navideña" />
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-1">Desde</label>
+                  <input type="date" formControlName="fechaInicio" class="form-control form-control-sm" />
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-1">Hasta</label>
+                  <input type="date" formControlName="fechaFin" class="form-control form-control-sm" />
+                </div>
+              </div>
+              @if (descuentoForm.controls.porcentaje.invalid && descuentoForm.controls.porcentaje.touched) {
+                <div class="text-danger small mt-1">El porcentaje debe estar entre 1 y 99.</div>
+              }
+              @if (descuentoForm.controls.motivo.invalid && descuentoForm.controls.motivo.touched) {
+                <div class="text-danger small mt-1">El motivo es obligatorio (máximo 100 caracteres).</div>
+              }
+              @if ((descuentoForm.controls.fechaInicio.invalid && descuentoForm.controls.fechaInicio.touched) || (descuentoForm.controls.fechaFin.invalid && descuentoForm.controls.fechaFin.touched)) {
+                <div class="text-danger small mt-1">Las dos fechas son obligatorias.</div>
+              }
+              @if (fechasInvalidas()) {
+                <div class="text-danger small mt-1">La fecha final no puede ser anterior a la inicial.</div>
+              }
+              <button type="submit" class="btn btn-primary btn-sm w-100 mt-3" [disabled]="isLoading()">
+                <i class="fa-solid fa-tags me-1"></i>{{ estadoDescuento() ? 'Reemplazar descuento' : 'Aplicar descuento' }}
+              </button>
+            </form>
           </div>
         </div>
       </div>

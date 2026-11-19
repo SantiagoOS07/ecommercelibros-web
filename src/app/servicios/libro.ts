@@ -13,7 +13,8 @@ import {
     ActualizarCategoriaLibroRequest,
     ActualizarImagenLibroRequest,
     LibroResponse,
-    LibroDetalleResponse
+    LibroDetalleResponse,
+    AplicarDescuentoLibroRequest
 } from '../modelos/libro';
 import { FiltroCatalogo, Pagina } from '../modelos/libro';
 
@@ -106,6 +107,14 @@ export class LibrosService {
 
     descontinuar(idLibro: string) {
         return this.http.put<void>(`${this.url}/${idLibro}/descontinuar`, null);
+    }
+
+    aplicarDescuento(idLibro: string, solicitud: AplicarDescuentoLibroRequest) {
+        return this.http.put<void>(`${this.url}/${idLibro}/descuento`, solicitud);
+    }
+
+    quitarDescuento(idLibro: string) {
+        return this.http.delete<void>(`${this.url}/${idLibro}/descuento`);
     }
 
     eliminar(idLibro: string) {

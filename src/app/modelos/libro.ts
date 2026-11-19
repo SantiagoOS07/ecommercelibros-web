@@ -31,6 +31,12 @@ export interface LibroDetalleResponse {
     categoria: CategoriaLibro;
     imagen: string;
     estado: EstadoLibro;
+    precioFinal: number;
+    descuentoVigente: boolean;
+    porcentajeDescuento: number | null;
+    motivoDescuento: string | null;
+    fechaInicioDescuento: string | null;
+    fechaFinDescuento: string | null;
 }
 export interface LibroResponse {
     idLibro: string;
@@ -48,6 +54,12 @@ export interface LibroResponse {
     categoria: CategoriaLibro;
     imagen: string;
     estado: EstadoLibro;
+    precioFinal: number;
+    descuentoVigente: boolean;
+    porcentajeDescuento: number | null;
+    motivoDescuento: string | null;
+    fechaInicioDescuento: string | null;
+    fechaFinDescuento: string | null;
 }
 
 export interface RegistrarLibroRequest {
@@ -105,6 +117,13 @@ export interface  ActualizarCategoriaLibroRequest {
 
 export interface ActualizarImagenLibroRequest { 
     imagen: string 
+}
+
+export interface AplicarDescuentoLibroRequest {
+    porcentaje: number;
+    motivo: string;
+    fechaInicio: string;
+    fechaFin: string;
 }
 
 export interface Pagina<T> {

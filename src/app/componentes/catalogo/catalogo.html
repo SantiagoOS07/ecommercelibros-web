@@ -93,10 +93,22 @@
               <span class="badge" [class]="badgeEstado(libro.estado)">{{ libro.estado }}</span>
             </div>
             <div class="card-body">
-              <p class="mb-2">
-                <i class="fa-solid fa-tag me-1"></i>
-                {{ libro.precio | number:'1.2-2' }} {{ libro.moneda }}
-              </p>
+              @if (libro.descuentoVigente) {
+                <p class="mb-1">
+                  <i class="fa-solid fa-tag me-1"></i>
+                  <del class="text-muted small me-1">{{ libro.precio | number:'1.2-2' }}</del>
+                  <span class="fw-semibold text-danger">{{ libro.precioFinal | number:'1.2-2' }} {{ libro.moneda }}</span>
+                  <span class="badge bg-danger ms-1">-{{ libro.porcentajeDescuento | number:'1.0-2' }}%</span>
+                </p>
+                <p class="mb-2 small text-danger">
+                  <i class="fa-solid fa-gift me-1"></i>{{ libro.motivoDescuento }}
+                </p>
+              } @else {
+                <p class="mb-2">
+                  <i class="fa-solid fa-tag me-1"></i>
+                  {{ libro.precio | number:'1.2-2' }} {{ libro.moneda }}
+                </p>
+              }
               <p class="mb-0 text-muted small">
                 <i class="fa-solid fa-layer-group me-1"></i>{{ libro.categoria }}
               </p>

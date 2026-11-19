@@ -3,6 +3,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { Observable, catchError, concat, of, toArray } from 'rxjs';
 import { LibrosService } from '../../servicios/libro';
 import { EditorialesService } from '../../servicios/editorial';
@@ -12,7 +13,7 @@ import { CATEGORIAS_LIBRO, CategoriaLibro, LibroResponse, MONEDAS, Moneda } from
 
 @Component({
   selector: 'app-editar-libro',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, DecimalPipe],
   templateUrl: './editar-libro.html',
   styleUrl: './editar-libro.css'
 })
@@ -63,6 +64,24 @@ export class EditarLibro {
     imagen: ['', Validators.maxLength(500)]
   });
 
+  descuentoForm = this.fb.group({
+    porcentaje: [10, [Validators.required, Validators.min(1), Validators.max(99)]],
+    motivo: ['', [Validators.required, Validators.maxLength(100)]],
+    fechaInicio: ['', Validators.required],
+    fechaFin: ['', Validators.required]
+  });
+
+  estadoDescuento = computed(() => {
+    const libro = this.libro();
+    if (!libro || libro.porcentajeDescuento === null) {
+      return null;
+    }
+    if (libro.descuentoVigente) {
+      return 'VIGENTE';
+    }
+    return (libro.fechaInicioDescuento ?? '') > this.hoy() ? 'PROGRAMADO' : 'VENCIDO';
+  });
+
   constructor() {
     this.cargar();
   }
@@ -85,6 +104,12 @@ export class EditarLibro {
             fechaPublicacion: libro.fechaPublicacion,
             categoria: libro.categoria,
             imagen: libro.imagen ?? ''
+          });
+          this.descuentoForm.reset({
+            porcentaje: libro.porcentajeDescuento ?? 10,
+            motivo: libro.motivoDescuento ?? '',
+            fechaInicio: libro.fechaInicioDescuento ?? this.hoy(),
+            fechaFin: libro.fechaFinDescuento ?? ''
           });
         },
         error: () => {
@@ -146,6 +171,36 @@ export class EditarLibro {
     this.cargar();
   }
 
+  fechasInvalidas(): boolean {
+    const { fechaInicio, fechaFin } = this.descuentoForm.getRawValue();
+    return fechaInicio !== '' && fechaFin !== '' && fechaFin < fechaInicio;
+  }
+
+  aplicarDescuento(): void {
+    if (this.descuentoForm.invalid || this.fechasInvalidas()) {
+      this.descuentoForm.markAllAsTouched();
+      return;
+    }
+    const descuento = this.descuentoForm.getRawValue();
+    this.ejecutar(
+      this.librosService.aplicarDescuento(this.id, { ...descuento, motivo: descuento.motivo.trim() }),
+      'Descuento aplicado correctamente'
+    );
+  }
+
+  quitarDescuento(): void {
+    this.ejecutar(this.librosService.quitarDescuento(this.id), 'Descuento quitado');
+  }
+
+  badgeDescuento(estado: string): string {
+    const colores: Record<string, string> = {
+      VIGENTE: 'bg-danger',
+      PROGRAMADO: 'bg-info text-dark',
+      VENCIDO: 'bg-secondary'
+    };
+    return colores[estado] ?? 'bg-secondary';
+  }
+
   agotar(): void {
     this.ejecutar(this.librosService.agotar(this.id), 'El libro quedó AGOTADO');
   }
@@ -186,6 +241,13 @@ export class EditarLibro {
       default:
         return 'bg-secondary';
     }
+  }
+
+  private hoy(): string {
+    const fecha = new Date();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${fecha.getFullYear()}-${mes}-${dia}`;
   }
 
   private ejecutar(peticion: Observable<unknown>, mensaje: string): void {
