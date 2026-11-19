@@ -26,7 +26,10 @@
               <label class="form-label fw-medium">Contraseña</label>
               <div class="input-group">
                 <span class="input-group-text bg-body-tertiary"><i class="fa-solid fa-lock text-muted"></i></span>
-                <input type="password" formControlName="contrasenia" class="form-control" placeholder="••••••••" />
+                <input [type]="mostrarContrasenia() ? 'text' : 'password'" formControlName="contrasenia" class="form-control" placeholder="••••••••" />
+                <button type="button" class="btn btn-outline-secondary" (click)="alternarContrasenia()">
+                  <i class="fa-solid" [class.fa-eye]="!mostrarContrasenia()" [class.fa-eye-slash]="mostrarContrasenia()"></i>
+                </button>
               </div>
               @if (loginForm.get('contrasenia')?.invalid && loginForm.get('contrasenia')?.touched) {
                 <div class="text-danger small mt-1">La contraseña debe tener al menos 8 caracteres.</div>

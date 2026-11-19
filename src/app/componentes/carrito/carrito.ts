@@ -1,16 +1,16 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { CarritosService } from '../../servicios/carritos';
 import { AuthService } from '../../servicios/auth';
 import { NotificacionesService } from '../../servicios/notificaciones';
-import { AgregarItemCarritoRequest, CarritoResponse } from '../../modelos/carrito';
+import { CarritoResponse, ItemCarritoResponse } from '../../modelos/carrito';
 
 @Component({
-  imports: [ReactiveFormsModule, DecimalPipe, RouterLink],
+  imports: [DecimalPipe, RouterLink],
   selector: 'app-carrito',
   styleUrl: './carrito.css',
   templateUrl: './carrito.html',
@@ -20,33 +20,18 @@ export class Carrito {
   private authService = inject(AuthService);
   private avisos = inject(NotificacionesService);
   private destroyRef = inject(DestroyRef);
-  private formBuilder = inject(FormBuilder);
 
   carrito = signal<CarritoResponse | null>(null);
   cargando = signal(true);
   result = signal('');
   isLoading = signal(false);
 
-  agregarForm = this.formBuilder.group({
-    idLibro: ['', Validators.required],
-    cantidad: [1, [Validators.required, Validators.min(1)]]
-  });
-
-  cantidadForm = this.formBuilder.group({
-    idLibro: ['', Validators.required],
-    cantidad: [0, [Validators.required, Validators.min(0)]]
-  });
-
-  eliminarItemForm = this.formBuilder.group({
-    idLibro: ['', Validators.required]
-  });
-
   constructor() {
     this.cargar();
   }
 
   cargar(): void {
-    this.carritosService.consultarPorUsuario(this.authService.getUid() ?? '')
+    this.carritosService.obtenerOCrear(this.authService.getUid() ?? '')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (carrito) => {
@@ -56,42 +41,24 @@ export class Carrito {
         error: (err) => {
           this.carrito.set(null);
           this.cargando.set(false);
-          if (err.status !== 404) {
-            this.avisos.error(this.mensajeError(err.status));
-          }
+          this.avisos.error(this.mensajeError(err));
         }
       });
   }
 
-  crear(): void {
-    this.ejecutar(this.carritosService.crear(), 'Carrito creado');
-  }
-
-  agregar(): void {
+  cambiarCantidad(item: ItemCarritoResponse, cambio: number): void {
     const carrito = this.carrito();
-    if (!carrito || this.agregarForm.invalid) return;
-    const solicitud = this.agregarForm.value as AgregarItemCarritoRequest;
-    this.ejecutar(this.carritosService.agregarItem(carrito.idCarrito, solicitud), 'Libro agregado al carrito');
-    this.agregarForm.reset({ idLibro: '', cantidad: 1 });
-  }
-
-  actualizarCantidad(): void {
-    const carrito = this.carrito();
-    if (!carrito || this.cantidadForm.invalid) return;
-    const { idLibro, cantidad } = this.cantidadForm.value;
+    if (!carrito || !item.idLibro) return;
     this.ejecutar(
-      this.carritosService.actualizarCantidad(carrito.idCarrito, idLibro!, { cantidad: cantidad! }),
+      this.carritosService.actualizarCantidad(carrito.idCarrito, item.idLibro, { cantidad: item.cantidad + cambio }),
       'Cantidad actualizada'
     );
-    this.cantidadForm.reset({ idLibro: '', cantidad: 0 });
   }
 
-  eliminarItem(): void {
+  quitar(item: ItemCarritoResponse): void {
     const carrito = this.carrito();
-    if (!carrito || this.eliminarItemForm.invalid) return;
-    const idLibro = this.eliminarItemForm.value.idLibro!;
-    this.ejecutar(this.carritosService.eliminarItem(carrito.idCarrito, idLibro), 'Libro quitado del carrito');
-    this.eliminarItemForm.reset();
+    if (!carrito || !item.idLibro) return;
+    this.ejecutar(this.carritosService.eliminarItem(carrito.idCarrito, item.idLibro), 'Libro quitado del carrito');
   }
 
   confirmar(): void {
@@ -127,7 +94,7 @@ export class Carrito {
           this.cargar();
         },
         error: (err) => {
-          this.avisos.error(this.mensajeError(err.status));
+          this.avisos.error(this.mensajeError(err));
           this.isLoading.set(false);
         }
       });
@@ -154,23 +121,23 @@ export class Carrito {
           this.cargar();
         },
         error: (err) => {
-          this.avisos.error(this.mensajeError(err.status));
+          this.avisos.error(this.mensajeError(err));
           this.isLoading.set(false);
         }
       });
   }
 
-  private mensajeError(status: number): string {
-    if (status === 404) {
+  private mensajeError(err: HttpErrorResponse): string {
+    if (err.status === 404) {
       return 'Error: no se encontró el carrito o el libro';
-    } else if (status === 400) {
+    } else if (err.status === 400) {
       return 'Error: revisa los datos ingresados';
-    } else if (status === 401 || status === 403) {
+    } else if (err.status === 401 || err.status === 403) {
       return 'Error: no tienes permiso o debes iniciar sesión';
-    } else if (status === 409) {
+    } else if (err.status === 409) {
       return 'Error: no hay stock suficiente para ese libro';
-    } else if (status === 422) {
-      return 'Error: la operación no es válida para el estado actual del carrito';
+    } else if (err.status === 422) {
+      return err.error?.mensaje ?? 'Error: la operación no es válida para el estado actual del carrito';
     }
     return 'Ocurrió un error. Intenta de nuevo más tarde';
   }

@@ -22,10 +22,18 @@
             <p class="mb-1"><strong>ID autor:</strong> {{ l.idAutor }}</p>
             <p class="mb-0"><strong>ID editorial:</strong> {{ l.idEditorial }}</p>
           </div>
-          <div class="card-footer">
+          <div class="card-footer d-flex gap-2">
             <a routerLink="/catalogo" class="btn btn-outline-secondary btn-sm">
               <i class="fa-solid fa-arrow-left me-1"></i>Volver al catálogo
             </a>
+            <button type="button" class="btn btn-primary btn-sm" (click)="comprar(l)"
+                    [disabled]="l.estado !== 'DISPONIBLE' || isLoading()">
+              @if (isLoading()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>Agregando...
+              } @else {
+                <i class="fa-solid fa-cart-shopping me-1"></i>Comprar
+              }
+            </button>
           </div>
         </div>
       </div>

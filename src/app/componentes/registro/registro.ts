@@ -19,6 +19,7 @@ export class Registro {
   private destroyRef = inject(DestroyRef);
 
   isLoading = signal(false);
+  mostrarContrasenia = signal(false);
 
   registroForm = inject(FormBuilder).group({
     nombre: ['', [Validators.required, Validators.maxLength(100)]],
@@ -32,6 +33,10 @@ export class Registro {
     telefono: ['', [Validators.required, Validators.maxLength(20)]],
     direccion: ['', [Validators.required, Validators.maxLength(200)]]
   });
+
+  alternarContrasenia(): void {
+    this.mostrarContrasenia.update(valor => !valor);
+  }
 
   onSubmit(): void {
     if (this.registroForm.invalid) return;

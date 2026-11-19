@@ -22,6 +22,8 @@ export class Perfil {
 
   usuario = signal<UsuarioResponse | null>(null);
   isLoading = signal(false);
+  mostrarActual = signal(false);
+  mostrarNueva = signal(false);
 
   nombreForm = this.formBuilder.group({
     nombre: ['', [Validators.required, Validators.maxLength(100)]]
@@ -116,6 +118,14 @@ export class Perfil {
 
   badgeEstado(estado: string): string {
     return estado === 'ACTIVO' ? 'bg-success' : 'bg-secondary';
+  }
+
+  alternarActual(): void {
+    this.mostrarActual.update(valor => !valor);
+  }
+
+  alternarNueva(): void {
+    this.mostrarNueva.update(valor => !valor);
   }
 
   private ejecutar(peticion: Observable<unknown>, mensaje: string): void {

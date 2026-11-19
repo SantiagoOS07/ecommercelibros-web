@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, map, of, switchMap, throwError } from 'rxjs';
 import {
   ActualizarCantidadItemCarritoRequest,
   AgregarItemCarritoRequest,
@@ -18,6 +19,33 @@ export class CarritosService {
 
   consultarPorUsuario(idUsuario: string) {
     return this.http.get<CarritoResponse>(`${this.url}?idUsuario=${idUsuario}`);
+  }
+
+  obtenerOCrear(idUsuario: string) {
+    return this.consultarPorUsuario(idUsuario).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status !== 404) {
+          return throwError(() => error);
+        }
+        return this.crear().pipe(
+          catchError((errorCrear: HttpErrorResponse) =>
+            errorCrear.status === 409
+              ? this.consultarPorUsuario(idUsuario)
+              : throwError(() => errorCrear)
+          )
+        );
+      })
+    );
+  }
+
+  agregarLibro(idUsuario: string, idLibro: string, cantidad: number) {
+    return this.obtenerOCrear(idUsuario).pipe(
+      switchMap(carrito =>
+        carrito.items.some(item => item.idLibro === idLibro)
+          ? of(false)
+          : this.agregarItem(carrito.idCarrito, { idLibro, cantidad }).pipe(map(() => true))
+      )
+    );
   }
 
   agregarItem(idCarrito: string, solicitud: AgregarItemCarritoRequest) {

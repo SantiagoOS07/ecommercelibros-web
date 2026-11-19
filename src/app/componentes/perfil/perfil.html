@@ -131,14 +131,24 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">Contraseña actual</label>
-                <input type="password" formControlName="contraseniaActual" class="form-control" />
+                <div class="input-group">
+                  <input [type]="mostrarActual() ? 'text' : 'password'" formControlName="contraseniaActual" class="form-control" />
+                  <button type="button" class="btn btn-outline-secondary" (click)="alternarActual()">
+                    <i class="fa-solid" [class.fa-eye]="!mostrarActual()" [class.fa-eye-slash]="mostrarActual()"></i>
+                  </button>
+                </div>
                 @if (contraseniaForm.get('contraseniaActual')?.invalid && contraseniaForm.get('contraseniaActual')?.touched) {
                   <div class="text-danger small mt-1">La contraseña actual es obligatoria.</div>
                 }
               </div>
               <div class="col-md-6">
                 <label class="form-label">Nueva contraseña</label>
-                <input type="password" formControlName="nuevaContrasenia" class="form-control" />
+                <div class="input-group">
+                  <input [type]="mostrarNueva() ? 'text' : 'password'" formControlName="nuevaContrasenia" class="form-control" />
+                  <button type="button" class="btn btn-outline-secondary" (click)="alternarNueva()">
+                    <i class="fa-solid" [class.fa-eye]="!mostrarNueva()" [class.fa-eye-slash]="mostrarNueva()"></i>
+                  </button>
+                </div>
                 @if (contraseniaForm.get('nuevaContrasenia')?.invalid && contraseniaForm.get('nuevaContrasenia')?.touched) {
                   <div class="text-danger small mt-1">La nueva contraseña debe tener al menos 8 caracteres.</div>
                 }

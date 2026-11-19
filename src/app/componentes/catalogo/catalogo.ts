@@ -1,10 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { LibrosService } from '../../servicios/libro';
+import { CarritosService } from '../../servicios/carritos';
+import { AuthService } from '../../servicios/auth';
 import { NotificacionesService } from '../../servicios/notificaciones';
+import { LibroDetalleResponse } from '../../modelos/libro';
 
 @Component({
   imports: [RouterLink, DecimalPipe],
@@ -14,10 +18,15 @@ import { NotificacionesService } from '../../servicios/notificaciones';
 })
 export class Catalogo {
   private librosService = inject(LibrosService);
+  private carritosService = inject(CarritosService);
+  private authService = inject(AuthService);
   private avisos = inject(NotificacionesService);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   readonly tamanio = 9;
   pagina = signal(0);
+  agregando = signal<string | null>(null);
   texto = signal('');
 
   busqueda = toSignal(
@@ -66,6 +75,32 @@ export class Catalogo {
     this.pagina.update(p => p + 1);
   }
 
+  anadirAlCarrito(libro: LibroDetalleResponse): void {
+    if (!this.authService.isAuthenticated()) {
+      this.avisos.info('Inicia sesión para comprar');
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.agregando.set(libro.idLibro);
+
+    this.carritosService.agregarLibro(this.authService.getUid() ?? '', libro.idLibro, 1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (agregado) => {
+          this.agregando.set(null);
+          if (agregado) {
+            this.avisos.exito(`${libro.titulo} se agregó al carrito`);
+          } else {
+            this.avisos.info(`${libro.titulo} ya estaba en tu carrito`);
+          }
+        },
+        error: (err) => {
+          this.agregando.set(null);
+          this.avisos.error(this.mensajeError(err));
+        }
+      });
+  }
+
   badgeEstado(estado: string): string {
     switch (estado) {
       case 'DISPONIBLE':
@@ -75,5 +110,18 @@ export class Catalogo {
       default:
         return 'bg-secondary';
     }
+  }
+
+  private mensajeError(err: HttpErrorResponse): string {
+    if (err.status === 404) {
+      return 'Error: no se encontró el libro';
+    } else if (err.status === 401 || err.status === 403) {
+      return 'Error: no tienes permiso o debes iniciar sesión';
+    } else if (err.status === 409) {
+      return 'Error: no hay stock suficiente para este libro';
+    } else if (err.status === 422) {
+      return err.error?.mensaje ?? 'Error: no se pudo agregar el libro al carrito';
+    }
+    return 'Ocurrió un error. Intenta de nuevo más tarde';
   }
 }

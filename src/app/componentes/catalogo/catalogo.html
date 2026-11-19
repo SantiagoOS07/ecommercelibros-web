@@ -42,7 +42,15 @@
                 <i class="fa-solid fa-layer-group me-1"></i>{{ libro.categoria }}
               </p>
             </div>
-            <div class="card-footer text-end">
+            <div class="card-footer d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-primary btn-sm" (click)="anadirAlCarrito(libro)"
+                      [disabled]="agregando() === libro.idLibro">
+                @if (agregando() === libro.idLibro) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>Añadiendo...
+                } @else {
+                  <i class="fa-solid fa-cart-plus me-1"></i>Añadir al carrito
+                }
+              </button>
               <a [routerLink]="['/catalogo', libro.idLibro]" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-eye me-1"></i>Ver detalle
               </a>

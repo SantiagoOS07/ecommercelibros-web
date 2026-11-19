@@ -24,9 +24,14 @@ export class Login {
   });
 
   isLoading = signal(false);
+  mostrarContrasenia = signal(false);
 
   formStatus = toSignal(this.loginForm.statusChanges, { initialValue: 'INVALID' as const });
   canSubmit = computed(() => this.formStatus() === 'VALID' && !this.isLoading());
+
+  alternarContrasenia(): void {
+    this.mostrarContrasenia.update(valor => !valor);
+  }
 
   onSubmit(): void {
     if (!this.canSubmit()) return;
